@@ -15,10 +15,11 @@ public class CaesarCipher{
     }
 
     static void runEncryption(boolean encrypt){
-        System.out.println("Enter %smessage. White spaces ignored. Enter line \"%s\" to end message.\n",
+        System.out.printf("Enter %smessage. White spaces ignored. Enter line \"%s\" to end message.\n",
                            (encrypt)?"":"encoded ",exitMsg);
         StringBuilder stringBuilder = new StringBuilder();
-        do(String line = sc.nextLine()){
+        String line = sc.nextLine();
+        do{
             stringBuilder.add(line.split(" ","\t","\n"));
             line = sc.nextLine();
         } while(!line.equalsIgnoreCase(exitMsg));
@@ -30,15 +31,15 @@ public class CaesarCipher{
             System.out.println("Enter number for cipher shift.");
         } else {
             System.out.println("Enter number corresponding with decrypted snippet:");
-            for(char c, int i=1;i<26;i++){
+            for(int i=1;i<26;i++){
                 // when decrypting, shift DOWN
                 System.out.printf("%-2d ",i);
                 for(int j=0;j<dSnippetLength;j++){
-                    c = code.charAt(j)-i;
-                    c += (c<65)?26:0
+                    char c = code.charAt(j)-i;
+                    c += (c<65)? 26:0;
                     System.out.print(c);
                 }
-                System.out.println()
+                System.out.println();
             }
         }
             
@@ -46,18 +47,18 @@ public class CaesarCipher{
 
         if(encrypt){
             System.out.println("Cipher selected. Encrypted message:");
-            for(char c, int j=0;j<string.length();j++){
-                c = string.charAt(j)+cipher;
-                c -= (c>90)? 26:0
+            for(int j=0;j<string.length();j++){
+                char c = string.charAt(j)+cipher;
+                c -= (c>90)? 26:0;
                 System.out.print(c);
                 if(j%5==4) System.out.print(" ");
             }
         } else {
             System.out.println("Number selected is cipher. Decrypted message:");
             string = string.toLowerCase();
-            for(char c, int j=0;j<string.length();j++){
-                c = string.charAt(j)-cipher;
-                c += (c<97) 26:0;
+            for(int j=0;j<string.length();j++){
+                char c = string.charAt(j)-cipher;
+                c += (c<97)? 26:0;
                 System.out.print(c);
             }
         }
