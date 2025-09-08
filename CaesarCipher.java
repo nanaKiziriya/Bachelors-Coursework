@@ -12,6 +12,7 @@ public class CaesarCipher{
         if(sc.next().toUpperCase().charAt(0)=='Y') runEncryption(true);
         System.out.println("Decrypt?");
         if(sc.next().toUpperCase().charAt(0)=='Y') runEncryption(false);
+        System.out.println("Program terminate.");
     }
 
     static void runEncryption(boolean encrypt){
@@ -62,6 +63,8 @@ public class CaesarCipher{
                 System.out.print(c);
             }
         }
+        System.out.println();
+        System.out.println();
         
     }
 }
