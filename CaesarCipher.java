@@ -20,7 +20,7 @@ public class CaesarCipher{
         StringBuilder stringBuilder = new StringBuilder();
         String line = sc.nextLine();
         do{
-            stringBuilder.add(line.split(" ","\t","\n"));
+            stringBuilder.append(line.replaceAll(" ","").replaceAll("\t",""));
             line = sc.nextLine();
         } while(!line.equalsIgnoreCase(exitMsg));
         
@@ -35,7 +35,7 @@ public class CaesarCipher{
                 // when decrypting, shift DOWN
                 System.out.printf("%-2d ",i);
                 for(int j=0;j<dSnippetLength;j++){
-                    char c = code.charAt(j)-i;
+                    char c = (char)(string.charAt(j)-i);
                     c += (c<65)? 26:0;
                     System.out.print(c);
                 }
@@ -48,7 +48,7 @@ public class CaesarCipher{
         if(encrypt){
             System.out.println("Cipher selected. Encrypted message:");
             for(int j=0;j<string.length();j++){
-                char c = string.charAt(j)+cipher;
+                char c = (char)(string.charAt(j)+cipher);
                 c -= (c>90)? 26:0;
                 System.out.print(c);
                 if(j%5==4) System.out.print(" ");
@@ -57,7 +57,7 @@ public class CaesarCipher{
             System.out.println("Number selected is cipher. Decrypted message:");
             string = string.toLowerCase();
             for(int j=0;j<string.length();j++){
-                char c = string.charAt(j)-cipher;
+                char c = (char)(string.charAt(j)-cipher);
                 c += (c<97)? 26:0;
                 System.out.print(c);
             }
