@@ -14,13 +14,14 @@ public class HammingCode{
     printSystemStatus();
     
     while(true){
-      System.out.println("What would you like to do?\n"
-                      + "0 - Terminate program\n"
-                      + "1 - Change Hamming Code system\n"
-                      + "2 - Tx: transmit a message\n"
-                      + "3 - Rx: receive and correct a message\n");
+      String[] options = {
+        "Terminate program",
+        "Change Hamming Code system",
+        "Tx: transmit a message",
+        "Rx: receive and correct a message"
+      };
     
-      int input = inputOptions(0,3);
+      int input = inputOptions(options);
 
       switch(input){
         case 0: sc.close(); System.exit(0);
@@ -31,35 +32,16 @@ public class HammingCode{
     }
   }
 
-  // DONE
-  // Underlies all user inputs
-  private static String userInput(){
-    System.out.print(" > ");
-    return sc.nextLine();
-  }
-
-  // DONE
-  // Choosing btwn options provided, between 'first' and 'last'
-  private static int inputOptions(int first, int last){
-    while(true){
-      System.out.println(" Enter a number between %d and %d: ",first,last);
-      try{
-        int input = Integer.parseInt(userInput());
-        if(user<first||user>last) System.out.println("Input must be an available option.");
-        else return input;
-      } catch(Exception e){
-        System.out.println("Input must be an integer. Try again.");
-      }
-    }
-  }
+  
 
   private static void setSystemStatus(){
-    System.out.println("What would you like to do?\n"
-                      + "1 - Switch system parity. This affects whether all values XOR to 0 (even) or 1 (odd).\n"
-                      + "2 - Change # of parity bits. This also sets # of data bits to max possible value.\n"
-                      + "3 - Change total Tx length. Tx includes both parity and data bits.\n");
+    String[] options = {
+      "Switch system parity. This affects whether all values XOR to 0 (even) or 1 (odd).",
+      "Change # of parity bits. This also sets # of data bits to max possible value.",
+      "Change total Tx length. Tx includes both parity and data bits."
+    }
     
-    int input = inputOptions(1,3);
+    int input = inputOptions(options);
 
     switch(input){
       case 1:
@@ -83,5 +65,37 @@ public class HammingCode{
   }
 
   static uiBinTup();
+
+
+  /* HELPER METHODS */
+
+  // DONE
+  // Underlies all user inputs
+  private static String userInput(){
+    System.out.print(" > ");
+    return sc.nextLine();
+  }
+
+  // DONE
+  // Lets user choose btwn options provided
+  private static int inputOptions(String[] options){
+    int first = 0, last = options.length-1;
+
+    System.out.println("What would you like to do?");
+    for(int i=0; i<options.length; i++)
+      System.out.printf("%d - %s\n",i,options[i]);
+
+    while(true){
+      System.out.println(" Enter a number between %d and %d: ",first,last);
+      try{
+        int input = Integer.parseInt(userInput());
+        if(user<first||user>last) System.out.println("Input must be an available option.");
+        else return input;
+      } catch(Exception e){
+        System.out.println("Input must be an integer. Try again.");
+      }
+    }
+  }
+  
     
 }
