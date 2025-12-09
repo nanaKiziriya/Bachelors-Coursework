@@ -54,7 +54,16 @@ public class HammingCode{
   }
 
   private static void setSystemStatus(){
+    System.out.println("What would you like to do?\n"
+                      + "1 - Switch system parity. This affects whether all values XOR to 0 (even) or 1 (odd).\n"
+                      + "2 - Change # of parity bits. This also sets # of data bits to max possible value.\n"
+                      + "3 - Change total Tx length. Tx includes both parity and data bits.\n");
     
+    int input = inputOptions(1,3);
+
+    switch(input){
+      case 1:
+        
   }
 
   // DONE
