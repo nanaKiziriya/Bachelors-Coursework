@@ -13,13 +13,21 @@ public class HammingCode{
 
     printSystemStatus();
     
-    while(true);
-      int input = inputOptions();
+    while(true){
+      System.out.println("What would you like to do?\n"
+                      + "0 - Terminate program\n"
+                      + "1 - Change Hamming Code system\n"
+                      + "2 - Tx: transmit a message\n"
+                      + "3 - Rx: receive and correct a message\n");
     
-      if(input==0) {sc.close(); System.exit(0);}
-      else if (input==1) changeSystem();
-      else if (input==2) doTx();
-      else doRx();
+      int input = inputOptions(0,3);
+
+      switch(input){
+        case 0: sc.close(); System.exit(0);
+        case 1: changeSystem; break;
+        case 2: doTx(); break;
+        case 3: doRx(); break;
+      }
     }
   }
 
@@ -31,18 +39,13 @@ public class HammingCode{
   }
 
   // DONE
-  // Choosing btwn options 0,1,2,3
-  private static int inputOptions(){
-    System.out.println("What would you like to do?\n"
-                      + "0 - Terminate program\n"
-                      + "1 - Change Hamming Code system\n"
-                      + "2 - Tx: transmit a message\n"
-                      + "3 - Rx: receive and correct a message\n");
+  // Choosing btwn options provided, between 'first' and 'last'
+  private static int inputOptions(int first, int last){
     while(true){
-      System.out.println(" Enter 0, 1, 2, or 3: ");
+      System.out.println(" Enter a number between %d and %d: ",first,last);
       try{
         int input = Integer.parseInt(userInput());
-        if(user<0||user>3) System.out.println("Input must be an available option.");
+        if(user<first||user>last) System.out.println("Input must be an available option.");
         else return input;
       } catch(Exception e){
         System.out.println("Input must be an integer. Try again.");
@@ -54,6 +57,7 @@ public class HammingCode{
     
   }
 
+  // DONE
   private static void printSystemStatus(){
     System.out.printf("CURRENT STATUS\n"
                       + "System parity: %s\n"
@@ -61,14 +65,14 @@ public class HammingCode{
                       + "# of data bits: %d\n"
                       + "Total Tx length: %d\n"
                       + "Value of each bit: %s\n",
-                      systemParity==1?"ODD":"EVEN",numParityBits,numDataBits,numParityBits+numDataBits,bitValues);
-
-    
-    // Math.pow(2,numParityBits)-numParityBits-1
-     = 3; // parity bits are powers of 2, starting from 1
-     = {3,5,6,7,1,2,4};
+                      
+                      systemParity==1?"ODD":"EVEN",
+                      numParityBits,
+                      numDataBits,
+                      numParityBits+numDataBits,
+                      bitValues);
   }
 
-  static uiBinTup
+  static uiBinTup();
     
 }
