@@ -217,12 +217,12 @@ public class HammingCode{
   private static byte optionsPrompt(String[] options){
     System.out.println("What would you like to do?");
     for(int i=0; i<options.length; i++) System.out.printf("%d - %s\n",i,options[i]);
-    return numberPrompt(0,options.length-1);
+    return validNumberPrompt(0,options.length-1);
   }
 
   // DONE
   // Prompts for an integer within given range, and returns valid input
-  private static byte numberPrompt(byte first, byte last){
+  private static byte validNumberPrompt(byte first, byte last){
     while(true){
       System.out.print("Enter a number between %d and %d: ",first,last);
       try{
@@ -238,40 +238,32 @@ public class HammingCode{
   // DONE
   // Turns input of 1's and 0's into byte value
   private static byte dataBitsPrompt(byte bitLength){
-    while(true){
-      try{
-        String input = bitStringPrompt(bitLength);
-        byte byteValue=0;
-        for(int i=0; i<input.length(); i++){
-          byteValue*=2;
-          byteValue+=Byte.parseByte(input.charAt(i));
-        }
-        return byteValue;
-      } catch(Exception e){
-        System.out.printf("Input must be 1's and 0's, of length %d. Try again.\n",bitLength);
-      }
-    }
-    
+    String input = validBitStringPrompt(bitLength);
+    byte byteValue=0;
+    for(int i=0; i<input.length(); i++) byteValue = 2*byteValue + Byte.parseByte(input.charAt(i));
+    return byteValue;
   }
 
-  private static String bitStringPrompt(byte bitLength){
+  // DONE
+  // Returns String of bits of given length
+  private static String validBitStringPrompt(byte bitLength){
     while(true){
+      boolean isValid = true;
       System.out.println("Enter an %d-bit token: ",bitLength);
       String input = userInput();
       if(input.length()!=bitLength){
         System.out.printf("Input must be length %d. Try again.\n",bitLength);
         continue;
       }
-      
       for(int i=0; i<input.length(); i++){
         byte b = Byte.parseByte(input.charAt(i));
         if(b!=b%2){
           System.out.println("Input must be 1's and 0's. Try again.");
+          isValid = false;
           break;
         }
-        byteValue*=2;
-        byteValue+=b;
       }
+      if(isValid) return input;
     }
   }
 
