@@ -2,7 +2,7 @@ public class HammingCode{
 
   private static byte systemParity = 1; // Either even (0) or odd (10. Standard is odd (1), meaning xor all bit values results in all 1's
   private static int numDataBits = 4; // Math.pow(2,numParityBits)-numParityBits-1
-  private static int numParityBits = 3; // parity bits are powers of 2, starting from 1
+  private static int numParityBits = 3; // Must be <= Math.log(Integer.MAX)/Math.log(2)
   private static int[] bitValues = {3,5,6,7,1,2,4};
   private final static Scanner sc = new Scanner(System.in);
 
@@ -32,8 +32,15 @@ public class HammingCode{
     }
   }
 
+/* Tx METHODS */
 
-/* HAMMING METHODS */
+  private static void doTx(){
+    System.out.println("Enter your plaintext message in 1 line. Each char will be converted to 8-bit binary, and sent as %d separate lines of Hamming code.");
+    char[] plaintext = sc.nextLine().toCharArray();
+    
+
+  
+/* SET SYSTEM STATUS METHODS */
 
   // DONE
   // Branches to Hamming system-changing methods
@@ -55,16 +62,35 @@ public class HammingCode{
         case 3: setNumTotalBits(); break; // affects numParityBits, numDataBits, bitValues
       }
 
-      System.out.println("Done.");
+      System.out.println("Change successful.");
     }
   }
 
+  // DONE
   private static void setNumParityBits(){
     System.out.println("Enter the new number of parity bits.");
-    numParityBits = numberPrompt(1); // any positive integer
+    numParityBits = numberPrompt(1,Math.floor(Math.log(Integer.MAX_VALUE)/Math.log(2))); // positive integer < log(MAX)/log(2)
     numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
+    resetBitValues();
+  }
+
+  // DONE
+  private static void setNumTotalBits(){
+    System.out.println("Enter the new total Tx length.");
+    int total = numberPrompt(1,Integer.MAX_VALUE-1);
+    numParityBits = Math.floor(Math.log(total)/Math.log(2));
+    numDataBits = total-numParityBits;
+    resetBitValues();
+  }
+    
+  // DONE
+  private static void resetBitValues(){
+    if(numDataBits+numParityBits>Math.pow(2,numParityBits)-1){
+      System.err.print("ERROR: The value 'numParityBits' is not large enough to support 'numDataBits'.");
+      System.exit(1);
+    }
     bitValues = new int[numParityBits+numDataBits];
-    for(int i=1,dIndex=0,pPow=0; dIndex<numDataBits;i++){
+    for(int i=1,dIndex=0,pPow=0; dIndex<numDataBits||pPow<bitValues.length;i++){
       if(i==Math.pow(2,pPow)){
         bitValues[bitValues.length-numParityBits+pPow]=i;
         pPow++;
@@ -74,8 +100,6 @@ public class HammingCode{
       }
     }
   }
-
-  private static void setNumTotalBits();
 
 
 /* HELPER METHODS */
@@ -126,6 +150,5 @@ public class HammingCode{
                       numParityBits+numDataBits,
                       bitValues);
   }
-  
     
 }
