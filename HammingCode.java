@@ -79,7 +79,7 @@ public class HammingCode{
     }
   }
 
-// NOT Done
+  // DONE
   private static void doBasicTx(){
     byte data = bitsPrompt(numDataBits);
     byte parity = printHammingData(data,numDataBits);
@@ -233,16 +233,30 @@ public class HammingCode{
     }
   }
 
-  private static long bitsPrompt(byte n){
+  // DONE
+  // Turns input of 1's and 0's into byte value
+  private static byte bitsPrompt(byte bitLength){
     while(true){
-      System.out.print("Enter an %d-bit token: ",n);
+      System.out.println("Enter an %d-bit token: ",bitLength);
       try{
-        byte input = Byte.parseByte(userInput());
-        
-        if(user<first||user>last) System.out.println("Input must be 1's and 0's. Try again.");
-        else return input;
+        String input = userInput();
+        if(input.length()!=bitLength){
+          System.out.printf("Input must be length %d. Try again.\n",bitLength);
+          continue;
+        }
+        byte byteValue=0;
+        for(int i=0; i<input.length(); i++){
+          byte b = Byte.parseByte(input.charAt(i));
+          if(b!=b%2){
+            System.out.println("Input must be 1's and 0's. Try again.");
+            break;
+          }
+          byteValue*=2;
+          byteValue+=b;
+        }
+        return byteValue;
       } catch(Exception e){
-        System.out.println("Input must be 1's and 0's. Try again.");
+        System.out.printf("Input must be 1's and 0's, of length %d. Try again.\n",bitLength);
       }
     }
     
