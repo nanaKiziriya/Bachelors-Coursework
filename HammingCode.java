@@ -21,31 +21,85 @@ public class HammingCode{
         "Rx: receive and correct a message"
       };
     
-      int input = inputOptions(options);
+      int input = optionsPrompt(options);
 
       switch(input){
         case 0: sc.close(); System.exit(0);
-        case 1: changeSystem; break;
+        case 1: setSystemStatus(); break;
         case 2: doTx(); break;
         case 3: doRx(); break;
       }
     }
   }
 
-  
 
+/* HAMMING METHODS */
+
+  // DONE
+  // Branches to Hamming system-changing methods
   private static void setSystemStatus(){
-    String[] options = {
-      "Switch system parity. This affects whether all values XOR to 0 (even) or 1 (odd).",
-      "Change # of parity bits. This also sets # of data bits to max possible value.",
-      "Change total Tx length. Tx includes both parity and data bits."
-    }
-    
-    int input = inputOptions(options);
+    while(true){
+      String[] options = {
+        "Nothing. Return to main menu.",
+        String.format("Switch system parity to %s. All values would XOR to %d.",systemParity==1?"ODD":"EVEN",systemParity),
+        "Change # of parity bits. This also sets # of data bits to max possible value.",
+        "Change total Tx length. This also affects both # of parity and data bits."
+      }
+      
+      int input = optionsPrompt(options);
+  
+      switch(input){
+        case 0: printSystemStatus(); return;
+        case 1: systemParity^=1; break;
+        case 2: setNumParityBits(); break; // affects numParityBits, numDataBits, bitValues
+        case 3: setNumTotalBits(); break; // affects numParityBits, numDataBits, bitValues
+      }
 
-    switch(input){
-      case 1:
-        
+      System.out.println("Done.");
+    }
+  }
+
+  private static void setNumParityBits(){
+    System.out.println("Enter new number of parity bits:");
+    numParityBits = numberPrompt(1); // any positive integer
+    numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
+    
+  }
+
+  private static void setNumTotalBits();
+
+
+/* HELPER METHODS */
+
+  // DONE
+  // Underlies all user inputs
+  private static String userInput(){
+    System.out.print(" > ");
+    return sc.nextLine();
+  }
+
+  // DONE
+  // Lets user choose btwn options provided, and returns valid (nonnegative integer) input
+  private static int optionsPrompt(String[] options){
+    System.out.println("What would you like to do?");
+    for(int i=0; i<options.length; i++) System.out.printf("%d - %s\n",i,options[i]);
+    return numberPrompt(0,options.length-1);
+  }
+
+  // DONE
+  // Prompts for an integer within given range, and returns valid input
+  private static int numberPrompt(int first){ return numberPrompt(first,Integer.MAX); }
+  private static int numberPrompt(int first, int last){
+    while(true){
+      System.out.print(" Enter a number between %d and %d: ",first,last);
+      try{
+        int input = Integer.parseInt(userInput());
+        if(user<first||user>last) System.out.println("Input must be an valid/available option. Try again.");
+        else return input;
+      } catch(Exception e){
+        System.out.println("Input must be an integer. Try again.");
+      }
+    }
   }
 
   // DONE
@@ -62,39 +116,6 @@ public class HammingCode{
                       numDataBits,
                       numParityBits+numDataBits,
                       bitValues);
-  }
-
-  static uiBinTup();
-
-
-  /* HELPER METHODS */
-
-  // DONE
-  // Underlies all user inputs
-  private static String userInput(){
-    System.out.print(" > ");
-    return sc.nextLine();
-  }
-
-  // DONE
-  // Lets user choose btwn options provided
-  private static int inputOptions(String[] options){
-    int first = 0, last = options.length-1;
-
-    System.out.println("What would you like to do?");
-    for(int i=0; i<options.length; i++)
-      System.out.printf("%d - %s\n",i,options[i]);
-
-    while(true){
-      System.out.println(" Enter a number between %d and %d: ",first,last);
-      try{
-        int input = Integer.parseInt(userInput());
-        if(user<first||user>last) System.out.println("Input must be an available option.");
-        else return input;
-      } catch(Exception e){
-        System.out.println("Input must be an integer. Try again.");
-      }
-    }
   }
   
     
