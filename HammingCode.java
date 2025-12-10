@@ -222,10 +222,10 @@ public class HammingCode{
   // Prompts for an integer within given range, and returns valid input
   private static byte numberPrompt(byte first, byte last){
     while(true){
-      System.out.print(" Enter a number between %d and %d: ",first,last);
+      System.out.print("Enter a number between %d and %d: ",first,last);
       try{
         byte input = Byte.parseByte(userInput());
-        if(user<first||user>last) System.out.println("Input must be an valid/available option. Try again.");
+        if(input<first||input>last) System.out.println("Input must be an valid/available option. Try again.");
         else return input;
       } catch(Exception e){
         System.out.println("Input must be a reasonably small whole number. Try again.");
@@ -233,7 +233,20 @@ public class HammingCode{
     }
   }
 
-  private static long bitsPrompt(numDataBits);
+  private static long bitsPrompt(byte n){
+    while(true){
+      System.out.print("Enter an %d-bit token: ",n);
+      try{
+        byte input = Byte.parseByte(userInput());
+        
+        if(user<first||user>last) System.out.println("Input must be 1's and 0's. Try again.");
+        else return input;
+      } catch(Exception e){
+        System.out.println("Input must be 1's and 0's. Try again.");
+      }
+    }
+    
+  }
 
   // DONE
   private static void printSystemStatus(){
