@@ -32,6 +32,37 @@ public class HammingCode{
     }
   }
 
+/* Rx METHODS */
+
+  private static void doRx(){
+    
+    System.out.printf("PROTOCOL:\n"
+                      + "1. You enter the entire binary string in one line.\n"
+                      + "1. Each %d-bit chunk of Hamming code is calculated for error.\n"
+                      + "2. Error is indicated, and code corrected.\n"
+                      + "3. Corrected code is converted back to plaintext.\n\n"
+                      numParityBits+numDataBits
+                      );
+    
+    try{
+      System.out.println("Enter your plaintext message:");
+      byte[] message = sc.nextLine().getBytes();
+    } catch(Exception e){
+      System.err.println(e.getMessage());
+      System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
+      return;
+    }
+
+    System.out.println("\nTransmitting...");
+    for(byte b:message) for(byte i=numChunks-1;i>=0;i--){
+      byte data = b/Math.pow(2,numDataBits*i);
+      byte parity = printHammingData(data,numDataBits);
+      printHammingParity(parity,numParityBits);
+      System.out.println();
+      b %= Math.pow(2,numDataBits*i);
+    }
+  }
+  
 /* Tx METHODS */
 
   // DONE
@@ -40,9 +71,9 @@ public class HammingCode{
     
     System.out.printf("PROTOCOL:\n"
                       + "1. You enter a plaintext message in one line.\n"
-                      + "1. Each ASCII character is converted to 8-bit binary.\n"
-                      + "2. Each one is turned into %d %d-bit chunk(s).\n"
-                      + "3. Each chunk is converted to %d bit Hamming code, and transmitted.\n\n"
+                      + "2. Each ASCII character is converted to 8-bit binary.\n"
+                      + "3. Each one is turned into %d %d-bit chunk(s).\n"
+                      + "4. Each chunk is converted to %d bit Hamming code, and transmitted.\n\n"
                       numChunks,
                       numDataBits,
                       numParityBits+numDataBits);
@@ -61,6 +92,7 @@ public class HammingCode{
       byte data = b/Math.pow(2,numDataBits*i);
       byte parity = printHammingData(data,numDataBits);
       printHammingParity(parity,numParityBits);
+      System.out.println();
       b %= Math.pow(2,numDataBits*i);
     }
   }
