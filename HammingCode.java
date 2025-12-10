@@ -34,6 +34,7 @@ public class HammingCode{
 
 /* Rx METHODS */
 
+  // ??
   private static void doRx(){
     
     System.out.printf("PROTOCOL:\n"
@@ -46,7 +47,7 @@ public class HammingCode{
     
     try{
       System.out.println("Enter your plaintext message:");
-      byte[] message = sc.nextLine().getBytes();
+      byte[] message = userInput().getBytes();
     } catch(Exception e){
       System.err.println(e.getMessage());
       System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
@@ -65,7 +66,7 @@ public class HammingCode{
   
 /* Tx METHODS */
 
-  // DONE
+  // DONE??
   private static void doTx(){
     byte numChunks = Math.ceil(8/numDataBits);
     
@@ -80,7 +81,7 @@ public class HammingCode{
     
     try{
       System.out.println("Enter your plaintext message:");
-      byte[] message = sc.nextLine().getBytes();
+      byte[] message = userInput().getBytes();
     } catch(Exception e){
       System.err.println(e.getMessage());
       System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
@@ -97,7 +98,7 @@ public class HammingCode{
     }
   }
 
-  // DONE
+  // DONE??
   // Accepts a byte of same binary length as numDataBits
   // Recursive, returns parity -> printHammingParity() after
   private static byte printHammingData(byte b,byte numBitsLeft){
@@ -107,7 +108,7 @@ public class HammingCode{
     return (bitValues[numDataBits-numBitsLeft]*data)^parity;
   }
 
-  // DONE
+  // DONE??
   // Accepts a byte of same binary length as numParityBits
   // Recursive
   private static byte printHammingParity(byte b,byte numBitsLeft){
@@ -168,13 +169,13 @@ public class HammingCode{
       System.exit(1);
     }
     bitValues = new int[numParityBits+numDataBits];
-    for(byte i=1,dIndex=0,pPow=0; dIndex<numDataBits||pPow<bitValues.length;i++){
+    for(byte i=1,dIndex=numDataBits-1,pPow=0; dIndex>=0||pPow<bitValues.length;i++){
       if(i==Math.pow(2,pPow)){
         bitValues[bitValues.length-numParityBits+pPow]=i;
         pPow++;
       }else{
         bitValues[dIndex]=i;
-        dIndex++;
+        dIndex--;
       }
     }
   }
