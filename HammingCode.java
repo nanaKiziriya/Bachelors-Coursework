@@ -3,6 +3,7 @@ public class HammingCode{
   private static byte systemParity = 0; // Either even (0) or odd (1). All bits must XOR to systemParity
   private static byte numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1
   private static byte numParityBits = 3; // Must be s.t. >=2 AND <= 4, because ASCII conv. to 8-bit tuples, and Byte.MAX_VALUE==127
+  priavte static byte numChunks = 2; // how many Hamming chunks one 8- bit ASCII char is broken into
   private static byte[] bitValues = {7,6,5,3,1,2,4};
   private final static Scanner sc = new Scanner(System.in);
 
@@ -46,8 +47,8 @@ public class HammingCode{
                       );
     
     try{
-      System.out.println("Enter the received :");
-      byte[] message = userInput().getBytes();
+      System.out.println("Enter each %d-bit Hamming code in a new line. Enter a blank line when done.");
+      String[][] charRxChunks = userInput().getBytes();
     } catch(Exception e){
       System.err.println(e.getMessage());
       System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
@@ -81,14 +82,13 @@ public class HammingCode{
 
   // DONE
   private static void doBasicTx(){
-    byte data = bitsPrompt(numDataBits);
+    byte data = dataBitsPrompt(numDataBits);
     byte parity = printHammingData(data,numDataBits);
     printHammingParity(parity,numParityBits);
   }
 
   // DONE
   private static void doAdvancedTx(){
-    byte numChunks = Math.ceil(8/numDataBits);
     
     System.out.printf("PROTOCOL:\n"
                       + "1. You enter a plaintext message in one line.\n"
@@ -170,6 +170,7 @@ public class HammingCode{
     System.out.println("What's the new number of parity bits?");
     numParityBits = numberPrompt(2,4); // accomodates ASCII chars as bytes
     numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
+    numChunks = Math.ceil(8/numDataBits);
     resetBitValues();
   }
 
@@ -179,6 +180,7 @@ public class HammingCode{
     byte total = numberPrompt(3,15); // accomodates ASCII chars as bytes: parity bits between [2,7]
     numParityBits = Math.floor(Math.log(total)/Math.log(2));
     numDataBits = total-numParityBits;
+    numChunks = Math.ceil(8/numDataBits);
     resetBitValues();
   }
     
@@ -193,7 +195,7 @@ public class HammingCode{
       if(i==Math.pow(2,pPow)){
         bitValues[bitValues.length-numParityBits+pPow]=i;
         pPow++;
-      }else{
+      } else {
         bitValues[dIndex]=i;
         dIndex--;
       }
@@ -235,24 +237,14 @@ public class HammingCode{
 
   // DONE
   // Turns input of 1's and 0's into byte value
-  private static byte bitsPrompt(byte bitLength){
+  private static byte dataBitsPrompt(byte bitLength){
     while(true){
-      System.out.println("Enter an %d-bit token: ",bitLength);
       try{
-        String input = userInput();
-        if(input.length()!=bitLength){
-          System.out.printf("Input must be length %d. Try again.\n",bitLength);
-          continue;
-        }
+        String input = bitStringPrompt(bitLength);
         byte byteValue=0;
         for(int i=0; i<input.length(); i++){
-          byte b = Byte.parseByte(input.charAt(i));
-          if(b!=b%2){
-            System.out.println("Input must be 1's and 0's. Try again.");
-            break;
-          }
           byteValue*=2;
-          byteValue+=b;
+          byteValue+=Byte.parseByte(input.charAt(i));
         }
         return byteValue;
       } catch(Exception e){
@@ -260,6 +252,27 @@ public class HammingCode{
       }
     }
     
+  }
+
+  private static String bitStringPrompt(byte bitLength){
+    while(true){
+      System.out.println("Enter an %d-bit token: ",bitLength);
+      String input = userInput();
+      if(input.length()!=bitLength){
+        System.out.printf("Input must be length %d. Try again.\n",bitLength);
+        continue;
+      }
+      
+      for(int i=0; i<input.length(); i++){
+        byte b = Byte.parseByte(input.charAt(i));
+        if(b!=b%2){
+          System.out.println("Input must be 1's and 0's. Try again.");
+          break;
+        }
+        byteValue*=2;
+        byteValue+=b;
+      }
+    }
   }
 
   // DONE
@@ -277,5 +290,6 @@ public class HammingCode{
                       numParityBits+numDataBits,
                       bitValues);
   }
+
     
 }
