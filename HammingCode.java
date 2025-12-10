@@ -2,7 +2,7 @@ public class HammingCode{
 
   private static byte systemParity = 0; // Either even (0) or odd (1). All bits must XOR to systemParity
   private static byte numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1
-  private static byte numParityBits = 3; // Must be s.t. >=2 AND <= 7, because ASCII conv. to bytes, and Byte.MAX_VALUE==127
+  private static byte numParityBits = 3; // Must be s.t. >=2 AND <= 4, because ASCII conv. to 8-bit tuples, and Byte.MAX_VALUE==127
   private static byte[] bitValues = {7,6,5,3,1,2,4};
   private final static Scanner sc = new Scanner(System.in);
 
@@ -34,7 +34,7 @@ public class HammingCode{
 
 /* Rx METHODS */
 
-  // ??
+// NOT Done
   private static void doRx(){
     
     System.out.printf("PROTOCOL:\n"
@@ -68,6 +68,26 @@ public class HammingCode{
 
   // DONE 
   private static void doTx(){
+    byte input = optionsPrompt({
+      String.format("[Basic] Convert a %d-tuple into a %d-tuple Hamming code.",numDataBits,numDataBits+NumParityBits),
+      "[Advanced] Convert a plaintext message into Hamming code."
+      });
+
+    switch(input){
+      case 0: doAdvancedTx(); break;
+      case 1: doBasicTx(); break;
+    }
+  }
+
+// NOT Done
+  private static void doBasicTx(){
+    byte data = bitsPrompt(numDataBits);
+    byte parity = printHammingData(data,numDataBits);
+    printHammingParity(parity,numParityBits);
+  }
+
+  // DONE
+  private static void doAdvancedTx(){
     byte numChunks = Math.ceil(8/numDataBits);
     
     System.out.printf("PROTOCOL:\n"
@@ -212,6 +232,8 @@ public class HammingCode{
       }
     }
   }
+
+  private static long bitsPrompt(numDataBits);
 
   // DONE
   private static void printSystemStatus(){
