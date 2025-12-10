@@ -60,10 +60,19 @@ public class HammingCode{
   }
 
   private static void setNumParityBits(){
-    System.out.println("Enter new number of parity bits:");
+    System.out.println("Enter the new number of parity bits.");
     numParityBits = numberPrompt(1); // any positive integer
     numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
-    
+    bitValues = new int[numParityBits+numDataBits];
+    for(int i=1,dIndex=0,pPow=0; dIndex<numDataBits;i++){
+      if(i==Math.pow(2,pPow)){
+        bitValues[bitValues.length-numParityBits+pPow]=i;
+        pPow++;
+      }else{
+        bitValues[dIndex]=i;
+        dIndex++;
+      }
+    }
   }
 
   private static void setNumTotalBits();
