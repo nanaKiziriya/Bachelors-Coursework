@@ -9,9 +9,11 @@ public class HammingCode{
 
   // DONE
   public static void main(String[] args){
-    System.out.println("WELCOME TO HAMMING CODE PROGRAM.");
-    System.out.println("Note: Transmissions are sent as a combination of data bits and parity bits for error correction purposes.\n");
-
+    System.out.println("WELCOME TO MY ASCII HAMMING CODE PROGRAM.");
+    System.out.println("Concept: Transmissions are sent as a combination of data bits and parity bits for error correction purposes.");
+    System.out.println("Implementation: Code length is limited by ASCII char bitlength. Each char is broken into chunks for Hamming encoding.");
+    System.out.println();
+    
     printSystemStatus();
     
     while(true){
@@ -39,29 +41,20 @@ public class HammingCode{
   private static void doRx(){
     
     System.out.printf("PROTOCOL:\n"
-                      + "1. You enter the entire binary string in one line.\n"
-                      + "1. Each %d-bit chunk of Hamming code is calculated for error.\n"
-                      + "2. Error is indicated, and code corrected.\n"
-                      + "3. Corrected code is converted back to plaintext.\n\n"
+                      + "1. You enter each %d-bit Hamming code in a new line.\n"
+                      + "2. Each %d-bit chunk of Hamming code is calculated for error.\n"
+                      + "3. Error is indicated, and code corrected.\n"
+                      + "4. Corrected code is converted back to plaintext.\n\n"
                       numParityBits+numDataBits
                       );
     
     try{
-      System.out.println("Enter each %d-bit Hamming code in a new line. Enter a blank line when done.");
+      System.out.println("Enter  Enter a blank line when done.");
       String[][] charRxChunks = userInput().getBytes();
     } catch(Exception e){
       System.err.println(e.getMessage());
       System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
       return;
-    }
-
-    System.out.println("\nTransmitting...");
-    for(byte b:message) for(byte i=numChunks-1;i>=0;i--){
-      byte data = b/Math.pow(2,numDataBits*i);
-      byte parity = printHammingData(data,numDataBits);
-      printHammingParity(parity,numParityBits);
-      System.out.println();
-      b %= Math.pow(2,numDataBits*i);
     }
   }
   
@@ -168,7 +161,7 @@ public class HammingCode{
   // DONE
   private static void setNumParityBits(){
     System.out.println("What's the new number of parity bits?");
-    numParityBits = numberPrompt(2,4); // accomodates ASCII chars as bytes
+    numParityBits = validNumberPrompt(2,4); // accomodates ASCII chars as bytes
     numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
     numChunks = Math.ceil(8/numDataBits);
     resetBitValues();
@@ -177,7 +170,7 @@ public class HammingCode{
   // DONE
   private static void setNumTotalBits(){
     System.out.println("What's the new total Tx length?");
-    byte total = numberPrompt(3,15); // accomodates ASCII chars as bytes: parity bits between [2,7]
+    byte total = validNumberPrompt(3,15); // accomodates ASCII chars as bytes: parity bits between [2,7]
     numParityBits = Math.floor(Math.log(total)/Math.log(2));
     numDataBits = total-numParityBits;
     numChunks = Math.ceil(8/numDataBits);
@@ -238,7 +231,7 @@ public class HammingCode{
   // DONE
   // Turns input of 1's and 0's into byte value
   private static byte dataBitsPrompt(byte bitLength){
-    String input = validBitStringPrompt(bitLength);
+    String input = validBitStringPrompt(bitLength,false);
     byte byteValue=0;
     for(int i=0; i<input.length(); i++) byteValue = 2*byteValue + Byte.parseByte(input.charAt(i));
     return byteValue;
@@ -246,10 +239,11 @@ public class HammingCode{
 
   // DONE
   // Returns String of bits of given length
-  private static String validBitStringPrompt(byte bitLength){
+  private static String validBitStringPrompt(byte bitLength, boolean multipleLines){
+    if(!multipleLines) System.out.printf("Enter an %d-bit token: \n",bitLength);
+    else System.out.printf("Enter the %d-bit tokens. Enter a blank line when done: ",bitLength);
     while(true){
       boolean isValid = true;
-      System.out.println("Enter an %d-bit token: ",bitLength);
       String input = userInput();
       if(input.length()!=bitLength){
         System.out.printf("Input must be length %d. Try again.\n",bitLength);
@@ -264,6 +258,7 @@ public class HammingCode{
         }
       }
       if(isValid) return input;
+      else if(!multipleLines) System.out.println("Enter an %d-bit token: ",bitLength);
     }
   }
 
