@@ -35,8 +35,17 @@ public class HammingCode{
 /* Tx METHODS */
 
   private static void doTx(){
-    System.out.println("Enter your plaintext message in 1 line. Each char will be converted to 8-bit binary, and sent as %d separate lines of Hamming code.");
+    System.out.printf("PROTOCOL:\n"
+                      + "1. You enter a plaintext message in one line.\n"
+                      + "1. Each ASCII character is converted to 8-bit binary.\n"
+                      + "2. The long binary string is broken into %d bit chunks\n"
+                      + "3. Each chunk is converted to %d bit Hamming code, and transmitted.\n\n"
+                      numDataBits,
+                      numParityBits+numDataBits);
+    
+    System.out.println("Enter your plaintext message:");
     char[] plaintext = sc.nextLine().toCharArray();
+    
     
 
   
