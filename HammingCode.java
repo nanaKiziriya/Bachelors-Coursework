@@ -1,9 +1,9 @@
 public class HammingCode{
 
   private static byte systemParity = 1; // Either even (0) or odd (10. Standard is odd (1), meaning xor all bit values results in all 1's
-  private static int numDataBits = 4; // Math.pow(2,numParityBits)-numParityBits-1
-  private static int numParityBits = 3; // Must be <= Math.log(Integer.MAX)/Math.log(2)
-  private static int[] bitValues = {3,5,6,7,1,2,4};
+  private static byte numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1
+  private static byte numParityBits = 3; // Must be s.t. >=2 AND <= 7, because ASCII conv. to bytes, and Byte.MAX_VALUE==127
+  private static byte[] bitValues = {3,5,6,7,1,2,4};
   private final static Scanner sc = new Scanner(System.in);
 
   // DONE
@@ -21,7 +21,7 @@ public class HammingCode{
         "Rx: receive and correct a message"
       };
     
-      int input = optionsPrompt(options);
+      byte input = optionsPrompt(options);
 
       switch(input){
         case 0: sc.close(); System.exit(0);
@@ -57,15 +57,31 @@ public class HammingCode{
     }
 
     System.out.println("\nTransmitting...");
-    for(byte b:message) for(int i=numChunks-1;i>=0;i--){
-      printHammingCode(b/Math.pow(2,numDataBits*i));
+    for(byte b:message) for(byte i=numChunks-1;i>=0;i--){
+      byte data = b/Math.pow(2,numDataBits*i);
+      byte parity = printHammingData(data,numDataBits);
+      printHammingParity(parity,numParityBits);
       b %= Math.pow(2,numDataBits*i);
     }
   }
 
+  // DONE
   // Accepts a byte of same binary length as numDataBits
-  private static void printHammingCode(byte b){
-    
+  // Recursive, returns parity -> printHammingParity() after
+  private static byte printHammingData(byte b,byte numBitsLeft){
+    if(numBitsLeft<=0) return 0;
+    byte data = b%2, parity = printHammingData(b/2,numBitsLeft-1);
+    System.out.print(data);
+    return (bitValues[numDataBits-numBitsLeft]*data)^parity;
+  }
+
+  // DONE
+  // Accepts a byte of same binary length as numParityBits
+  // Recursive
+  private static byte printHammingParity(byte b,byte numBitsLeft){
+    if(numBitsLeft<=0) return;
+    printHammingParity(b/2,numBitsLeft-1);
+    System.out.print(b%2);
   }
 
   
@@ -82,7 +98,7 @@ public class HammingCode{
         "Change total Tx length. This also affects both # of parity and data bits."
       }
       
-      int input = optionsPrompt(options);
+      byte input = optionsPrompt(options);
   
       switch(input){
         case 0: printSystemStatus(); return;
@@ -98,16 +114,16 @@ public class HammingCode{
 
   // DONE
   private static void setNumParityBits(){
-    System.out.println("Enter the new number of parity bits.");
-    numParityBits = numberPrompt(2,Math.floor(Math.log(Integer.MAX_VALUE)/Math.log(2))); // positive integer < log(MAX)/log(2)
+    System.out.println("What's the new number of parity bits?");
+    numParityBits = numberPrompt(2,4); // accomodates ASCII chars as bytes
     numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
     resetBitValues();
   }
 
   // DONE
   private static void setNumTotalBits(){
-    System.out.println("Enter the new total Tx length.");
-    int total = numberPrompt(3,Integer.MAX_VALUE-1);
+    System.out.println("What's the new total Tx length?");
+    byte total = numberPrompt(3,15); // accomodates ASCII chars as bytes: parity bits between [2,7]
     numParityBits = Math.floor(Math.log(total)/Math.log(2));
     numDataBits = total-numParityBits;
     resetBitValues();
@@ -120,7 +136,7 @@ public class HammingCode{
       System.exit(1);
     }
     bitValues = new int[numParityBits+numDataBits];
-    for(int i=1,dIndex=0,pPow=0; dIndex<numDataBits||pPow<bitValues.length;i++){
+    for(byte i=1,dIndex=0,pPow=0; dIndex<numDataBits||pPow<bitValues.length;i++){
       if(i==Math.pow(2,pPow)){
         bitValues[bitValues.length-numParityBits+pPow]=i;
         pPow++;
@@ -143,7 +159,7 @@ public class HammingCode{
 
   // DONE
   // Lets user choose btwn options provided, and returns valid (nonnegative integer) input
-  private static int optionsPrompt(String[] options){
+  private static byte optionsPrompt(String[] options){
     System.out.println("What would you like to do?");
     for(int i=0; i<options.length; i++) System.out.printf("%d - %s\n",i,options[i]);
     return numberPrompt(0,options.length-1);
@@ -151,16 +167,15 @@ public class HammingCode{
 
   // DONE
   // Prompts for an integer within given range, and returns valid input
-  private static int numberPrompt(int first){ return numberPrompt(first,Integer.MAX); }
-  private static int numberPrompt(int first, int last){
+  private static byte numberPrompt(byte first, byte last){
     while(true){
       System.out.print(" Enter a number between %d and %d: ",first,last);
       try{
-        int input = Integer.parseInt(userInput());
+        byte input = Byte.parseByte(userInput());
         if(user<first||user>last) System.out.println("Input must be an valid/available option. Try again.");
         else return input;
       } catch(Exception e){
-        System.out.println("Input must be an integer. Try again.");
+        System.out.println("Input must be a reasonably small whole number. Try again.");
       }
     }
   }
