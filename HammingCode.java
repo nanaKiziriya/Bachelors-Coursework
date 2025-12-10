@@ -36,12 +36,14 @@ public class HammingCode{
 
   // DONE
   private static void doTx(){
+    byte numChunks = Math.ceil(8/numDataBits);
+    
     System.out.printf("PROTOCOL:\n"
                       + "1. You enter a plaintext message in one line.\n"
                       + "1. Each ASCII character is converted to 8-bit binary.\n"
                       + "2. Each one is turned into %d %d-bit chunk(s).\n"
                       + "3. Each chunk is converted to %d bit Hamming code, and transmitted.\n\n"
-                      Math.ceil(8/numDataBits),
+                      numChunks,
                       numDataBits,
                       numParityBits+numDataBits);
     
@@ -55,8 +57,9 @@ public class HammingCode{
     }
 
     System.out.println("\nTransmitting...");
-    for(byte b:message) for(int i=){
-      printHammingCode(b/16);
+    for(byte b:message) for(int i=numChunks-1;i>=0;i--){
+      printHammingCode(b/Math.pow(2,numDataBits*i));
+      b %= Math.pow(2,numDataBits*i);
     }
   }
 
