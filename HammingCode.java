@@ -3,7 +3,7 @@ public class HammingCode{
   private static byte systemParity = 1; // Either even (0) or odd (10. Standard is odd (1), meaning xor all bit values results in all 1's
   private static byte numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1
   private static byte numParityBits = 3; // Must be s.t. >=2 AND <= 7, because ASCII conv. to bytes, and Byte.MAX_VALUE==127
-  private static byte[] bitValues = {3,5,6,7,1,2,4};
+  private static byte[] bitValues = {7,6,5,3,1,2,4};
   private final static Scanner sc = new Scanner(System.in);
 
   // DONE
