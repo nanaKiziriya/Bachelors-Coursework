@@ -46,7 +46,7 @@ public class HammingCode{
                       );
     
     try{
-      System.out.println("Enter your plaintext message:");
+      System.out.println("Enter the received :");
       byte[] message = userInput().getBytes();
     } catch(Exception e){
       System.err.println(e.getMessage());
@@ -66,7 +66,7 @@ public class HammingCode{
   
 /* Tx METHODS */
 
-  // DONE??
+  // DONE 
   private static void doTx(){
     byte numChunks = Math.ceil(8/numDataBits);
     
@@ -98,7 +98,7 @@ public class HammingCode{
     }
   }
 
-  // DONE??
+  // DONE
   // Accepts a byte of same binary length as numDataBits
   // Recursive, returns parity -> printHammingParity() after
   private static byte printHammingData(byte b,byte numBitsLeft){
@@ -108,13 +108,13 @@ public class HammingCode{
     return (bitValues[numDataBits-numBitsLeft]*data)^parity;
   }
 
-  // DONE??
+  // DONE
   // Accepts a byte of same binary length as numParityBits
   // Recursive
   private static byte printHammingParity(byte b,byte numBitsLeft){
     if(numBitsLeft<=0) return;
-    printHammingParity(b/2,numBitsLeft-1);
     System.out.print(b%2);
+    printHammingParity(b/2,numBitsLeft-1);
   }
 
   
