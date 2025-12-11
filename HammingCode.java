@@ -92,7 +92,7 @@ public class HammingCode{
       }
 
       try{
-        charBytes[i/3] = charBytes[i/3]*(byte)Math.pow(2,numDataBits)+bitStringToByte(bitString.substring(0,numDataBits));
+        charBytes[i/3] = (byte)(charBytes[i/3]*Math.pow(2,numDataBits)+bitStringToByte(bitString.substring(0,numDataBits)));
       } catch(Exception E){} // No longer enough chunks to make a full ASCII char
     }
 
@@ -226,8 +226,8 @@ public class HammingCode{
   private static void setNumParityBits(){
     System.out.println("What's the new number of parity bits?");
     numParityBits = validNumberPrompt(2,4); // accomodates ASCII chars as bytes
-    numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
-    numTotalBits = numParityBits + numDataBits;
+    numDataBits = (byte)(Math.pow(2,numParityBits)-numParityBits-1);
+    numTotalBits = (byte)(numParityBits + numDataBits);
     numChunks = Math.ceil(8/numDataBits);
     resetBitValues();
   }
@@ -276,7 +276,7 @@ public class HammingCode{
   private static byte optionsPrompt(String[] options){
     System.out.println("What would you like to do?");
     for(int i=0; i<options.length; i++) System.out.printf("%d - %s\n",i,options[i]);
-    return validNumberPrompt(0,options.length-1;
+    return validNumberPrompt(0,options.length-1);
   }
 
   // DONE
