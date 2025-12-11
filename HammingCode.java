@@ -3,7 +3,7 @@ public class HammingCode{
   private static byte systemParity = 0; // Either even (0) or odd (1). All bits must XOR to systemParity
   private static byte numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1
   private static byte numParityBits = 3; // Must be s.t. >=2 AND <= 4, because ASCII conv. to 8-bit tuples, and Byte.MAX_VALUE==127
-  priavte static byte numChunks = 2; // how many Hamming chunks one 8- bit ASCII char is broken into
+  private static byte numChunks = 2; // how many Hamming chunks one 8- bit ASCII char is broken into
   private static byte[] bitValues = {7,6,5,3,1,2,4};
   private final static Scanner sc = new Scanner(System.in);
 
@@ -37,8 +37,23 @@ public class HammingCode{
 
 /* Rx METHODS */
 
-// NOT Done
   private static void doRx(){
+    byte input = optionsPrompt({
+      "[Basic] Do error detection and correction on a single line of Hamming code.",
+      "[Advanced] Correct and convert lines of Hamming code into a plaintext message."
+      });
+
+    switch(input){
+      case 0: doBasicRx(); break;
+      case 1: doAdvancedRx(); break;
+    }
+  }
+
+  private static void doBasicRx(){
+  }
+  
+// NOT Done
+  private static void doAdvancedRx(){
     
     System.out.printf("PROTOCOL:\n"
                       + "1. You enter each %d-bit Hamming code in a new line.\n"
@@ -63,13 +78,13 @@ public class HammingCode{
   // DONE 
   private static void doTx(){
     byte input = optionsPrompt({
-      String.format("[Basic] Convert a %d-tuple into a %d-tuple Hamming code.",numDataBits,numDataBits+NumParityBits),
-      "[Advanced] Convert a plaintext message into Hamming code."
+      String.format("[Basic] Convert a single %d-bit line of data into a %d-bit line of Hamming code.",numDataBits,numDataBits+NumParityBits),
+      "[Advanced] Convert a plaintext message into lines of Hamming code."
       });
 
     switch(input){
-      case 0: doAdvancedTx(); break;
-      case 1: doBasicTx(); break;
+      case 0: doBasicTx(); break;
+      case 1: doAdvancedTx(); break;
     }
   }
 
