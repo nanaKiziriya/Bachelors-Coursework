@@ -3,6 +3,7 @@ public class HammingCode{
   private static byte systemParity = 0; // Either even (0) or odd (1). All bits must XOR to systemParity
   private static byte numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1
   private static byte numParityBits = 3; // Must be s.t. >=2 AND <= 4, because ASCII conv. to 8-bit tuples, and Byte.MAX_VALUE==127
+  private static byte numTotalBits = 7;
   private static byte numChunks = 2; // how many Hamming chunks one 8- bit ASCII char is broken into
   private static byte[] bitValues = {7,6,5,3,1,2,4};
   private final static Scanner sc = new Scanner(System.in);
@@ -50,6 +51,7 @@ public class HammingCode{
   }
 
   private static void doBasicRx(){
+    String[] validBitStringPrompt(byte bitLength, boolean multipleLines)
   }
   
 // NOT Done
@@ -64,8 +66,7 @@ public class HammingCode{
                       );
     
     try{
-      System.out.println("Enter  Enter a blank line when done.");
-      String[][] charRxChunks = userInput().getBytes();
+      String[] charRxChunks = validBitStringPrompt(byte bitLength, boolean multipleLines)
     } catch(Exception e){
       System.err.println(e.getMessage());
       System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
@@ -178,6 +179,7 @@ public class HammingCode{
     System.out.println("What's the new number of parity bits?");
     numParityBits = validNumberPrompt(2,4); // accomodates ASCII chars as bytes
     numDataBits = Math.pow(2,numParityBits)-numParityBits-1;
+    numTotalBits = numParityBits + numDataBits;
     numChunks = Math.ceil(8/numDataBits);
     resetBitValues();
   }
@@ -188,6 +190,7 @@ public class HammingCode{
     byte total = validNumberPrompt(3,15); // accomodates ASCII chars as bytes: parity bits between [2,7]
     numParityBits = Math.floor(Math.log(total)/Math.log(2));
     numDataBits = total-numParityBits;
+    numTotalBits = numParityBits + numDataBits;
     numChunks = Math.ceil(8/numDataBits);
     resetBitValues();
   }
@@ -246,7 +249,7 @@ public class HammingCode{
   // DONE
   // Turns input of 1's and 0's into byte value
   private static byte dataBitsPrompt(byte bitLength){
-    String input = validBitStringPrompt(bitLength,false);
+    String input = validBitStringPrompt(bitLength,false)[0];
     byte byteValue=0;
     for(int i=0; i<input.length(); i++) byteValue = 2*byteValue + Byte.parseByte(input.charAt(i));
     return byteValue;
@@ -254,7 +257,7 @@ public class HammingCode{
 
   // DONE
   // Returns String of bits of given length
-  private static String validBitStringPrompt(byte bitLength, boolean multipleLines){
+  private static String[] validBitStringPrompt(byte bitLength, boolean multipleLines){
     if(!multipleLines) System.out.printf("Enter an %d-bit token: \n",bitLength);
     else System.out.printf("Enter the %d-bit tokens. Enter a blank line when done: ",bitLength);
     while(true){
@@ -283,13 +286,15 @@ public class HammingCode{
                       + "System parity: %s\n"
                       + "# of parity bits: %d\n"
                       + "# of data bits: %d\n"
-                      + "Total Tx length: %d\n"
+                      + "# of total bits: %d\n"
+                      + "# of Hamming code chunks per ASCII char: %d\n"
                       + "Value of each bit: %s\n",
                       
                       systemParity==1?"ODD":"EVEN",
                       numParityBits,
                       numDataBits,
-                      numParityBits+numDataBits,
+                      numTotalBits,
+                      numChunks,
                       bitValues);
   }
 
