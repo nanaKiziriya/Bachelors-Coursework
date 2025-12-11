@@ -1,3 +1,7 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class HammingCode{
 
   private static byte systemParity = 0; // Either even (0) or odd (1). All bits must XOR to systemParity
@@ -12,7 +16,7 @@ public class HammingCode{
   public static void main(String[] args){
     System.out.println("WELCOME TO MY ASCII HAMMING CODE PROGRAM.");
     System.out.println("Concept: Transmissions are sent as a combination of data bits and parity bits for error correction purposes.");
-    System.out.println("Implementation: Code length is limited by ASCII char bitlength. Each char is broken into chunks for Hamming encoding.");
+    System.out.println("Implementation: Code length is limited by ASCII char bit-length. Each char is broken into chunks for Hamming encoding.");
     System.out.println();
     
     printSystemStatus();
@@ -67,7 +71,7 @@ public class HammingCode{
                       multipleLines?String.format("Each %d-bit chunk of",numTotalBits):"The "
                       );
     
-    String[] bitStrings = validBitStringPrompt(bitLength, multipleLines);
+    String[] bitStrings = validBitStringPrompt(numTotalBits, multipleLines);
 
     byte[] charBytes = new byte[bitStrings.length/numChunks];
 
@@ -81,7 +85,7 @@ public class HammingCode{
       if(errorTerm==0){
         System.out.println("VALID");
       } else {
-        byte index = bitValues.indexOf(errorTerm);
+        byte index = (new ArrayList<Byte>(Arrays.asList(bitValues))).indexOf(errorTerm);
         bitString.replace(index,bitString.charAt(index)=='0'?'1':'0');
         System.out.println(bitString);
       }
