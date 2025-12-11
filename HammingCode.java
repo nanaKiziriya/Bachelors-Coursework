@@ -40,10 +40,12 @@ public class HammingCode{
 
   // DONE
   private static void doRx(){
-    byte input = optionsPrompt({
+
+    String[] options = {
       "[Basic] Do error detection and correction on a single line of Hamming code.",
       "[Advanced] Correct and convert lines of Hamming code into a plaintext message."
-      });
+    };
+    byte input = optionsPrompt(options);
 
     switch(input){
       case 0: doRx(false); break;
@@ -62,10 +64,10 @@ public class HammingCode{
                       multipleLines?"each ":"the ",
                       numTotalBits,
                       multipleLines?" in a new line":"",
-                      multipleLines?String.format("Each %d-bit chunk of",numTotalBits):"The ",
+                      multipleLines?String.format("Each %d-bit chunk of",numTotalBits):"The "
                       );
     
-    String[] bitStrings = validBitStringPrompt(byte bitLength, boolean multipleLines);
+    String[] bitStrings = validBitStringPrompt(bitLength, multipleLines);
 
     byte[] charBytes = new byte[bitStrings.length/numChunks];
 
@@ -86,7 +88,7 @@ public class HammingCode{
 
       try{
         charBytes[i/3] = charBytes[i/3]*Math.pow(2,numDataBits)+bitStringToByte(bits.substring(0,numDataBits));
-      } catch(Exception E); // No longer enough chunks to make a full ASCII char
+      } catch(Exception E){} // No longer enough chunks to make a full ASCII char
     }
 
     for(byte b:charBytes){
@@ -105,7 +107,7 @@ public class HammingCode{
   // DONE
   private static byte bitStringToByte(String bitString){
     byte sum = 0;
-    for(int i=0; i<bitString.length; i++)
+    for(int i=0; i<bitString.length; i++){
       sum*=2;
       if(bitString[i]=='1') sum++;
     }
@@ -116,10 +118,12 @@ public class HammingCode{
 
   // DONE 
   private static void doTx(){
-    byte input = optionsPrompt({
+    String[] options = {
       String.format("[Basic] Convert a single %d-bit line of data into a %d-bit line of Hamming code.",numDataBits,numDataBits+NumParityBits),
       "[Advanced] Convert a plaintext message into lines of Hamming code."
-      });
+      };
+      
+    byte input = optionsPrompt(options);
 
     switch(input){
       case 0: doBasicTx(); break;
@@ -141,7 +145,7 @@ public class HammingCode{
                       + "1. You enter a plaintext message in one line.\n"
                       + "2. Each ASCII character is converted to 8-bit binary.\n"
                       + "3. Each one is turned into %d %d-bit chunk(s).\n"
-                      + "4. Each chunk is converted to %d bit Hamming code, and transmitted.\n\n"
+                      + "4. Each chunk is converted to %d bit Hamming code, and transmitted.\n\n",
                       numChunks,
                       numDataBits,
                       numParityBits+numDataBits);
@@ -196,7 +200,7 @@ public class HammingCode{
         String.format("Switch system parity to %s. All values would XOR to %d.",systemParity==1?"ODD":"EVEN",systemParity),
         "Change # of parity bits. This also sets # of data bits to max possible value.",
         "Change total Tx length. This also affects both # of parity and data bits."
-      }
+      };
       
       byte input = optionsPrompt(options);
   
