@@ -38,6 +38,7 @@ public class HammingCode{
 
 /* Rx METHODS */
 
+  // DONE
   private static void doRx(){
     byte input = optionsPrompt({
       "[Basic] Do error detection and correction on a single line of Hamming code.",
@@ -45,33 +46,70 @@ public class HammingCode{
       });
 
     switch(input){
-      case 0: doBasicRx(); break;
-      case 1: doAdvancedRx(); break;
+      case 0: doRx(false); break;
+      case 1: doRx(true); break;
+    }
+  }
+  
+  // DONE
+  private static void doRx(boolean multipleLines){
+    
+    System.out.printf("PROTOCOL:\n"
+                      + "1. Enter %s%d-bit Hamming code%s.\n"
+                      + "2. %s Hamming code is calculated for error.\n"
+                      + "3. Error is indicated, and code corrected.\n"
+                      + "4. Corrected code is converted back to plaintext.\n\n",
+                      multipleLines?"each ":"the ",
+                      numTotalBits,
+                      multipleLines?" in a new line":"",
+                      multipleLines?String.format("Each %d-bit chunk of",numTotalBits):"The ",
+                      );
+    
+    String[] bitStrings = validBitStringPrompt(byte bitLength, boolean multipleLines);
+
+    byte[] charBytes = new byte[bitStrings.length/numChunks];
+
+    for(int i=0; i<bitStrings.length; i++){
+      
+      String bitString = bitStrings[i];
+      System.out.print(bitString+" -> "); // Now either print "VALID" or the corrected code
+      
+      byte errorTerm = hammingXOR(bitString);
+      
+      if(errorTerm==0){
+        System.out.println("VALID");
+      } else {
+        byte index = bitValues.indexOf(errorTerm);
+        bitString.replace(index,bitString.charAt(index)=='0'?'1':'0');
+        System.out.println(bitString);
+      }
+
+      try{
+        charBytes[i/3] = charBytes[i/3]*Math.pow(2,numDataBits)+bitStringToByte(bits.substring(0,numDataBits));
+      } catch(Exception E); // No longer enough chunks to make a full ASCII char
+    }
+
+    for(byte b:charBytes){
+      try{ System.out.print((char)b); }
+      catch(Exception e){ System.err.println("ERROR: Cannot convert %d to ASCII char.",b); }
     }
   }
 
-  private static void doBasicRx(){
-    String[] validBitStringPrompt(byte bitLength, boolean multipleLines)
+  // DONE
+  private static byte hammingXOR(String bitString){
+    byte sum = 0;
+    for(int i=0; i<bitString.length; i++) if(bitString[i]=='1') sum^=bitValues[i];
+    return sum;
   }
-  
-// NOT Done
-  private static void doAdvancedRx(){
-    
-    System.out.printf("PROTOCOL:\n"
-                      + "1. You enter each %d-bit Hamming code in a new line.\n"
-                      + "2. Each %d-bit chunk of Hamming code is calculated for error.\n"
-                      + "3. Error is indicated, and code corrected.\n"
-                      + "4. Corrected code is converted back to plaintext.\n\n"
-                      numParityBits+numDataBits
-                      );
-    
-    try{
-      String[] charRxChunks = validBitStringPrompt(byte bitLength, boolean multipleLines)
-    } catch(Exception e){
-      System.err.println(e.getMessage());
-      System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
-      return;
+
+  // DONE
+  private static byte bitStringToByte(String bitString){
+    byte sum = 0;
+    for(int i=0; i<bitString.length; i++)
+      sum*=2;
+      if(bitString[i]=='1') sum++;
     }
+    return sum;
   }
   
 /* Tx METHODS */
