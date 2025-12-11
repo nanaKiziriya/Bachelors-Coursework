@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class HammingCode{
@@ -85,35 +84,37 @@ public class HammingCode{
       if(errorTerm==0){
         System.out.println("VALID");
       } else {
-        byte index = (new ArrayList<Byte>(Arrays.asList(bitValues))).indexOf(errorTerm);
-        bitString.replace(index,bitString.charAt(index)=='0'?'1':'0');
+        byte index = (byte)(Arrays.asList(bitValues).indexOf(errorTerm));
+        char[] tempChars = bitString.toCharArray();
+        tempChars[index] = tempChars[index]=='0'?'1':'0';
+        bitString = new String(tempChars);
         System.out.println(bitString);
       }
 
       try{
-        charBytes[i/3] = charBytes[i/3]*Math.pow(2,numDataBits)+bitStringToByte(bits.substring(0,numDataBits));
+        charBytes[i/3] = charBytes[i/3]*(byte)Math.pow(2,numDataBits)+bitStringToByte(bitString.substring(0,numDataBits));
       } catch(Exception E){} // No longer enough chunks to make a full ASCII char
     }
 
     for(byte b:charBytes){
       try{ System.out.print((char)b); }
-      catch(Exception e){ System.err.println("ERROR: Cannot convert %d to ASCII char.",b); }
+      catch(Exception e){ System.err.printf("ERROR: Cannot convert %d to ASCII char.\n",b); }
     }
   }
 
   // DONE
   private static byte hammingXOR(String bitString){
     byte sum = 0;
-    for(int i=0; i<bitString.length; i++) if(bitString[i]=='1') sum^=bitValues[i];
+    for(int i=0; i<bitString.length(); i++) if(bitString.charAt(i)=='1') sum^=bitValues[i];
     return sum;
   }
 
   // DONE
   private static byte bitStringToByte(String bitString){
     byte sum = 0;
-    for(int i=0; i<bitString.length; i++){
+    for(int i=0; i<bitString.length(); i++){
       sum*=2;
-      if(bitString[i]=='1') sum++;
+      if(bitString.charAt(i)=='1') sum++;
     }
     return sum;
   }
@@ -123,7 +124,7 @@ public class HammingCode{
   // DONE 
   private static void doTx(){
     String[] options = {
-      String.format("[Basic] Convert a single %d-bit line of data into a %d-bit line of Hamming code.",numDataBits,numDataBits+NumParityBits),
+      String.format("[Basic] Convert a single %d-bit line of data into a %d-bit line of Hamming code.",numDataBits,numTotalBits),
       "[Advanced] Convert a plaintext message into lines of Hamming code."
       };
       
@@ -152,11 +153,12 @@ public class HammingCode{
                       + "4. Each chunk is converted to %d bit Hamming code, and transmitted.\n\n",
                       numChunks,
                       numDataBits,
-                      numParityBits+numDataBits);
+                      numTotalBits);
     
+    byte[] message;
     try{
       System.out.println("Enter your plaintext message:");
-      byte[] message = userInput().getBytes();
+      message = userInput().getBytes();
     } catch(Exception e){
       System.err.println(e.getMessage());
       System.err.println("ERROR: Unsupported character entered. Returning to main menu.");
@@ -164,7 +166,7 @@ public class HammingCode{
     }
 
     System.out.println("\nTransmitting...");
-    for(byte b:message) for(byte i=numChunks-1;i>=0;i--){
+    for(byte b:message) for(byte i=numChunks-(byte)1;i>=0;i--){
       byte data = b/Math.pow(2,numDataBits*i);
       byte parity = printHammingData(data,numDataBits);
       printHammingParity(parity,numParityBits);
@@ -178,7 +180,7 @@ public class HammingCode{
   // Recursive, returns parity -> printHammingParity() after
   private static byte printHammingData(byte b,byte numBitsLeft){
     if(numBitsLeft<=0) return systemParity;
-    byte data = b%2, parity = printHammingData(b/2,numBitsLeft-1);
+    byte data = b%(byte)2, parity = printHammingData(b/(byte)2,numBitsLeft-(byte)1);
     System.out.print(data);
     return (bitValues[numDataBits-numBitsLeft]*data)^parity;
   }
@@ -243,11 +245,11 @@ public class HammingCode{
     
   // DONE
   private static void resetBitValues(){
-    if(numDataBits+numParityBits>Math.pow(2,numParityBits)-1){
+    if(numTotalBits>Math.pow(2,numParityBits)-1){
       System.err.print("DEVELOPER ERROR: The value 'numParityBits' is not large enough to support 'numDataBits'.");
       System.exit(1);
     }
-    bitValues = new int[numParityBits+numDataBits];
+    bitValues = new int[numTotalBits];
     for(byte i=1,dIndex=numDataBits-1,pPow=0; dIndex>=0||pPow<bitValues.length;i++){
       if(i==Math.pow(2,pPow)){
         bitValues[bitValues.length-numParityBits+pPow]=i;
@@ -306,9 +308,15 @@ public class HammingCode{
   private static String[] validBitStringPrompt(byte bitLength, boolean multipleLines){
     if(!multipleLines) System.out.printf("Enter an %d-bit token: \n",bitLength);
     else System.out.printf("Enter the %d-bit tokens. Enter a blank line when done: ",bitLength);
+
+    ArrayList<String> inputs = new ArrayList<>();
+    
     while(true){
       boolean isValid = true;
       String input = userInput();
+      
+      if(multipleLines && inputs.size()>0 && input.trim().isEmpty()) return inputs;
+      
       if(input.length()!=bitLength){
         System.out.printf("Input must be length %d. Try again.\n",bitLength);
         continue;
@@ -321,9 +329,13 @@ public class HammingCode{
           break;
         }
       }
-      if(isValid) return input;
+      if(isValid){
+        inputs.add(input);
+        if(!multipleLines) return inputs;
+      }
       else if(!multipleLines) System.out.println("Enter an %d-bit token: ",bitLength);
     }
+    
   }
 
   // DONE
