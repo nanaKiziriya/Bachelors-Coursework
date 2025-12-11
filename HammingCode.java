@@ -104,19 +104,19 @@ public class HammingCode{
 
   // DONE
   private static byte hammingXOR(String bitString){
-    byte sum = 0;
+    int sum = 0;
     for(int i=0; i<bitString.length(); i++) if(bitString.charAt(i)=='1') sum^=bitValues[i];
-    return sum;
+    return (byte)sum;
   }
 
   // DONE
   private static byte bitStringToByte(String bitString){
-    byte sum = 0;
+    int sum = 0;
     for(int i=0; i<bitString.length(); i++){
       sum*=2;
       if(bitString.charAt(i)=='1') sum++;
     }
-    return sum;
+    return (byte)sum;
   }
   
 /* Tx METHODS */
@@ -166,8 +166,8 @@ public class HammingCode{
     }
 
     System.out.println("\nTransmitting...");
-    for(byte b:message) for(byte i=numChunks-(byte)1;i>=0;i--){
-      byte data = b/Math.pow(2,numDataBits*i);
+    for(byte b:message) for(int i=numChunks-1;i>=0;i--){
+      byte data = b/(byte)Math.pow(2,numDataBits*i);
       byte parity = printHammingData(data,numDataBits);
       printHammingParity(parity,numParityBits);
       System.out.println();
@@ -178,17 +178,17 @@ public class HammingCode{
   // DONE
   // Accepts a byte of same binary length as numDataBits
   // Recursive, returns parity -> printHammingParity() after
-  private static byte printHammingData(byte b,byte numBitsLeft){
+  private static byte printHammingData(int b,int numBitsLeft){
     if(numBitsLeft<=0) return systemParity;
-    byte data = b%(byte)2, parity = printHammingData(b/(byte)2,numBitsLeft-(byte)1);
+    int data = b%2, parity = printHammingData(b/2,numBitsLeft-1);
     System.out.print(data);
-    return (bitValues[numDataBits-numBitsLeft]*data)^parity;
+    return (byte)((bitValues[numDataBits-numBitsLeft]*data)^parity);
   }
 
   // DONE
   // Accepts a byte of same binary length as numParityBits
   // Recursive
-  private static byte printHammingParity(byte b,byte numBitsLeft){
+  private static void printHammingParity(int b,int numBitsLeft){
     if(numBitsLeft<=0) return;
     System.out.print(b%2);
     printHammingParity(b/2,numBitsLeft-1);
@@ -250,7 +250,7 @@ public class HammingCode{
       System.exit(1);
     }
     bitValues = new int[numTotalBits];
-    for(byte i=1,dIndex=numDataBits-1,pPow=0; dIndex>=0||pPow<bitValues.length;i++){
+    for(int i=1,dIndex=numDataBits-1,pPow=0; dIndex>=0||pPow<bitValues.length;i++){
       if(i==Math.pow(2,pPow)){
         bitValues[bitValues.length-numParityBits+pPow]=i;
         pPow++;
@@ -276,14 +276,14 @@ public class HammingCode{
   private static byte optionsPrompt(String[] options){
     System.out.println("What would you like to do?");
     for(int i=0; i<options.length; i++) System.out.printf("%d - %s\n",i,options[i]);
-    return validNumberPrompt(0,options.length-1);
+    return validNumberPrompt(0,options.length-1;
   }
 
   // DONE
   // Prompts for an integer within given range, and returns valid input
-  private static byte validNumberPrompt(byte first, byte last){
+  private static byte validNumberPrompt(int first, int last){
     while(true){
-      System.out.print("Enter a number between %d and %d: ",first,last);
+      System.out.printf("Enter a number between %d and %d:\n",first,last);
       try{
         byte input = Byte.parseByte(userInput());
         if(input<first||input>last) System.out.println("Input must be an valid/available option. Try again.");
@@ -296,16 +296,16 @@ public class HammingCode{
 
   // DONE
   // Turns input of 1's and 0's into byte value
-  private static byte dataBitsPrompt(byte bitLength){
+  private static byte dataBitsPrompt(int bitLength){
     String input = validBitStringPrompt(bitLength,false)[0];
-    byte byteValue=0;
-    for(int i=0; i<input.length(); i++) byteValue = 2*byteValue + Byte.parseByte(input.charAt(i));
-    return byteValue;
+    int byteValue=0;
+    for(int i=0; i<input.length(); i++) byteValue = 2*byteValue + Byte.parseByte(""+input.charAt(i));
+    return (byte)byteValue;
   }
 
   // DONE
   // Returns String of bits of given length
-  private static String[] validBitStringPrompt(byte bitLength, boolean multipleLines){
+  private static String[] validBitStringPrompt(int bitLength, boolean multipleLines){
     if(!multipleLines) System.out.printf("Enter an %d-bit token: \n",bitLength);
     else System.out.printf("Enter the %d-bit tokens. Enter a blank line when done: ",bitLength);
 
@@ -322,7 +322,7 @@ public class HammingCode{
         continue;
       }
       for(int i=0; i<input.length(); i++){
-        byte b = Byte.parseByte(input.charAt(i));
+        byte b = Byte.parseByte(""+input.charAt(i));
         if(b!=b%2){
           System.out.println("Input must be 1's and 0's. Try again.");
           isValid = false;
