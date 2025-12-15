@@ -5,10 +5,10 @@ import java.util.Scanner;
 public class HammingCode{
 
     private static int systemParity = 0; // Either even (0) or odd (1). All bits must XOR to systemParity
-    private static int numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1
+    private static int numDataBits = 4; // ==Math.pow(2,numParityBits)-numParityBits-1; will ALWAYS divide 8 (# bits per byte)
     private static int numParityBits = 3; // Must be s.t. >=2 AND <= 4, because ASCII conv. to 8-bit tuples
     private static int numTotalBits = 7;
-    private static int numChunks = 2; // how many Hamming chunks one 8- bit ASCII char is broken into
+    private static int numChunks = 2; // how many Hamming chunks one 8- bit ASCII char is broken into; will ALWAYS divide 8 (# bits per byte)
     private static int[] bitValues = {7,6,5,3,1,2,4};
     private final static Scanner sc = new Scanner(System.in);
 
@@ -108,7 +108,6 @@ public class HammingCode{
             }
 
             try{
-
                 charInts[i/numChunks] = (int) (charInts[i/numChunks]*Math.pow(2,numDataBits)+bitStringToInt(bitString.substring(0,numDataBits)));
             } catch(Exception E) { // No longer enough chunks to make a full ASCII char
                 leftoverChunks++;
@@ -137,6 +136,7 @@ public class HammingCode{
     }
 
     // DONE
+    // works for both data and full (data+parity) tuples
     private static int hammingXOR(String bitString){
         int sum = 0;
         for(int i=0; i<bitString.length(); i++) if(bitString.charAt(i)=='1') sum^=bitValues[i];
@@ -171,15 +171,20 @@ public class HammingCode{
     }
 
     // DONE
+    // accept String "10...10"
+    // hammingEncode() the data chunk
     private static void doBasicTx(){
-        int data = dataBitsPrompt(numDataBits);
+        String[] dataBitStrings = validBitStringPrompt(numDataBits,false);
         System.out.println("<Encoded Message>");
-        int parity = printHammingData(data,numDataBits);
-        printHammingParity(parity,numParityBits);
+        hammingEncode(dataBitStrings);
         System.out.println("\n");
     }
 
     // DONE
+    // accept long String "hello world"
+    // getBytes into array of char int values
+    // (turn each int into binary string, and split String into numChunks chunks of numDataBits size)
+    // hammingEncode(): for each data chunk:
     private static void doAdvancedTx(){
 
         System.out.printf("""
@@ -194,44 +199,56 @@ public class HammingCode{
                 numDataBits,
                 numTotalBits);
         pause(.5);
-        byte[] message;
+
+        byte[] charBytes;
         try{
             System.out.println("Enter your plaintext message:");
-            message = userInput().getBytes();
+            charBytes = userInput().getBytes();
         } catch(Exception e){
             System.err.println(e.getMessage());
             System.err.println("[ERROR] Unsupported character entered. Returning to main menu.");
             return;
         }
 
+        String[] dataBitStrings = byteToDataBitChunks(charBytes);
         System.out.println("<Encoded Message>");
-        for(int b:message) for(int i=numChunks-1;i>=0;i--){
-            int data = (int) (b/Math.pow(2,numDataBits*i));
-            int parity = printHammingData(data,numDataBits);
-            printHammingParity(parity,numParityBits);
+        hammingEncode(dataBitStrings);
+        System.out.println("\n");
+    }
+
+    private static String[] byteToDataBitChunks(byte[] bytes){
+        String[] chunks = new String[bytes.length*numChunks];
+
+        for(int i=0; i<bytes.length; i++){
+            for(int j=numChunks-1; j>=0; j--){
+                StringBuilder rChunk = new StringBuilder(numDataBits);
+                for(int k=0; k<numDataBits; k++){
+                    rChunk.append(bytes[i]%2);
+                    bytes[i]/=2;
+                }
+                chunks[numChunks*i+j] = rChunk.reverse().toString();
+            }
+        }
+
+        return chunks;
+    }
+
+    // DONE
+    // hammingEncode(): for each data chunk:
+    //  print data chunk
+    //  hammingXOR("10...10") returns xor int value of "on" data bits
+    //  repeat mod 2 div 2 and print parity bits for 1,2,4,...,2^(numParBits-1)
+    private static void hammingEncode(String[] dataBitStrings){
+        for(String dbs:dataBitStrings){
+            System.out.print(dbs);
+            int parity = hammingXOR(dbs);
+            for(int i=0; i<numParityBits; i++){
+                System.out.print(parity%2);
+                parity/=2;
+            }
             System.out.println();
-            b %= (int) Math.pow(2,numDataBits*i);
         }
         System.out.println();
-    }
-
-    // DONE
-    // Accepts an int of same binary length as numDataBits
-    // Recursive, returns parity -> printHammingParity() after
-    private static int printHammingData(int b,int numBitsLeft){
-        if(numBitsLeft<=0) return systemParity;
-        int data = b%2, parity = printHammingData(b/2,numBitsLeft-1);
-        System.out.print(data);
-        return (bitValues[numDataBits-numBitsLeft]*data)^parity;
-    }
-
-    // DONE
-    // Accepts an int of same binary length as numParityBits
-    // Recursive
-    private static void printHammingParity(int b,int numBitsLeft){
-        if(numBitsLeft<=0) return;
-        System.out.print(b%2);
-        printHammingParity(b/2,numBitsLeft-1);
     }
 
 
@@ -351,7 +368,7 @@ public class HammingCode{
     }
 
     // DONE
-    // Turns input of 1's and 0's into int value
+    // Prompts and turns String user input of 1's and 0's (of length bitLength) into corresponding int value
     private static int dataBitsPrompt(int bitLength){
         String input = validBitStringPrompt(bitLength,false)[0];
         int intValue=0;
@@ -360,7 +377,7 @@ public class HammingCode{
     }
 
     // DONE
-    // Returns String of bits of given length, multiple lines if specified
+    // Returns array of Strings of bits of given length, multiple lines if specified
     private static String[] validBitStringPrompt(int bitLength, boolean multipleLines){
         System.out.printf("Enter the %d-bit token%s",bitLength,multipleLines?"s. ":":");
         if(multipleLines) System.out.printf("Enter a blank line when done:",bitLength);
