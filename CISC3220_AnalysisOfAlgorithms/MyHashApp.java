@@ -15,6 +15,7 @@
 */
 
 import java.util.Random;
+import java.util.ArrayList;
 
 public class MyHashApp{
     public static void main(String[] args){
@@ -33,7 +34,7 @@ class MyHashSet<E>{
     private int numEntries = 0; // number of entries in all ArrayLists; NOT necessarily equal to loadSize (num ArrayLists)
     private int loadSize = 0; // entries.length return CAPACITY, not number of ArrayLists in entries
     private double loadFactor;
-    private int growthFactor; // capacity grows by growthFactor when size exceeds loadFactor*capacity
+    private int growthFactor; // capacity grows by growthFactor when loadSize exceeds loadFactor*capacity
     
     private int hashFactor; // Always < capacity; used for hash calculation; value not hardcoded; generated randomly to be coprime to container capacity: see this.generatehashFactor()
     private static Random random = new Random(); // for generatehashFactor()
@@ -46,39 +47,37 @@ class MyHashSet<E>{
         this(initCapacity, 0.75); } // Java HashSet default
     MyHashSet(int initCapacity, double loadFactor){
         this(initCapacity, loadFactor, 2); } // Java HashSet default
+    @SuppressWarnings("unchecked")
     MyHashSet(int initCapacity, double loadFactor, int growthFactor){
-        this.entries = new ArrayList<E>[initCapacity];
+        this.entries = (ArrayList<E>[]) new ArrayList<?>[initCapacity];
         this.loadFactor = loadFactor;
         this.growthFactor = growthFactor;
         this.hashFactor = generatehashFactor(initCapacity);
     }
 
-    public boolean add(Object o){
-        if(! o instanceof E) return false;
+    public boolean add(E o){
         int hashIndex = calculateHashCodeIndex(o);        
         if(entries[hashIndex].contains(o)) return false; // checks entire ArrayList at proper hash index
         entries[hashIndex].add(o);
-        size++;
+        numEntries++;
         return true;
     }
     public boolean contains(Object o){
-        if(! o instanceof E) return false;
         int hashIndex = calculateHashCodeIndex(o);
         return entries[hashIndex].contains(o);
     }
     public boolean remove(Object o){
-        if(! o instanceof E) return false;
         int hashIndex = calculateHashCodeIndex(o);        
         if(! entries[hashIndex].contains(o)) return false; // checks entire ArrayList at proper hash index
         entries[hashIndex].remove(o);
-        size--;
+        numEntries--;
         return true;
     }
     public int size(){ return this.numEntries; }
 
     /* Private Methods */
     
-    private calculateHashCodeIndex(E entry)){ return calculateHashCodeIndex(entry,this.hashFactor,this.entries.length); }
+    private int calculateHashCodeIndex(E entry){ return calculateHashCodeIndex(entry,this.hashFactor,this.entries.length); }
     
     // Equivalent objects must return the same index
     // Easier alternative: just use hashCode()
