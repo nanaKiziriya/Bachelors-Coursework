@@ -18,10 +18,11 @@
 import java.util.Random;
 import java.util.Objects;
 
-// Nana Kiziriya's MyHashMap assignment... I went overboard. It's unironically a mental illness.
+// Nana Kiziriya's MyHashMap assignment... I went overboard. Unironically, it's a mental illness.
 
 public class MyHashApp {
-    public static void main(String[]args) {
+    
+    public static void main(String[] args) {
         
         MyHashMap<String,Integer> hm = new MyHashMap<>();
         
@@ -61,6 +62,8 @@ public class MyHashApp {
     }
 }
 
+
+
 // Hashing: equivalent Objects must return the same hash, with different Objects having hashes that (almost) never coincide.
 // Potential issue from overflow if capacity*hashFactor exceeds Integer.MAX_VALUE ? nvm it should still get same index each time anyways...
 class MyHashMap<K,V> {
@@ -70,33 +73,47 @@ class MyHashMap<K,V> {
     // Standard HashSet defaults I believe :3
     private static final int DEFAULT_INIT_CAPACITY = 16;
     private static final double DEFAULT_LOAD_FACTOR = 0.75;
+    private static final double DEFAULT_GROWTH_FACTOR = 2;
     
-    private KeyValuePair<K,V>[] buckets; // I do not want automatic container growth: Do not use ArrayList, Vector, etc. for external container
+
+    // Outer container: array of <k,v> pairs; Inner container: linked nodes
+    // inner container at each index needs/prefers constant removal, so don't use a basic List/Vector! Linked nodes are superior here.
+    // I do not want automatic outer container growth => Do not use ArrayList, Vector, etc. for outer container!
+    private KeyValuePair<K,V>[] buckets;
+    
+    // capacity grows by growthFactor when size exceeds loadFactor*capacity
     private final double loadFactor;
-    // just gunna have growthFactor be *2 ... capacity grows by growthFactor when size exceeds loadFactor*capacity
-    private int hashFactor; // Always < capacity; used for hash calculation; value not hardcoded; generated randomly to be coprime to container capacity: see this.generatehashFactor()
-    private int size = 0; // number of entries, NOTTT the number of buckets w shit in it
+    private final double growthFactor;
+
+    // (co)prime used for hash calculation
+    // Security: value NOT hardcoded, generated randomly to be coprime to container capacity
+    // Always positive and < buckets.length (mathematically redundant, computationally efficient)
+    // See this.generatehashFactor()
+    private int hashFactor;
+
+    // number of entries, NOTTT the number of buckets w shit in it
     // capacity is buckets.length
+    private int size = 0;
+
+    // for this.generateHashFactor() : used at init and each resize
     private static Random random = new Random();
     
     /* CONSTRUCTORS */
-    
+
+    // delegation chain is pretty
     public MyHashMap(){ this(DEFAULT_INIT_CAPACITY); }
     public MyHashMap(int initCapacity) { this(initCapacity, DEFAULT_LOAD_FACTOR); }
+    public MyHashMap(int initCapacity, double loadFactor) { this(initCapacity, loadFactor, DEFAULT_GROWTH_FACTOR); }
     @SuppressWarnings("unchecked") //ew
-    public MyHashMap(int initCapacity, double loadFactor) {
-        if (initCapacity<=0 || loadFactor<=0) {
-            System.err.print("initCapacity & loadFactor must be positive");
-            System.exit(1);
-        }
+    public MyHashMap(int initCapacity, double loadFactor, double growthFactor) {
+        if(initCapacity<1) throw new Error("initCapacity must be positive int");
+        if(loadFactor<=0 || loadFactor>=1) throw new Error("loadFactor must be strictly between 0 and 1");
+        if(growthFactor<=1) throw new Error("growthFactor must be strictly greater than 1");
 
-        buckets = (KeyValuePair<K,V>[]) new KeyValuePair[initCapacity];
+        buckets = (KeyValuePair<K,V>[]) new KeyValuePair[initCapacity]; // unchecked :P
         this.loadFactor = loadFactor;
-        updateHashFactor();
-    }
-
-    private void updateHashFactor(){
-        this.hashFactor = generatehashFactor(this.buckets.length);
+        this.growthFactor = growthFactor;
+        updateHashFactor(); // sets this.hashFactor randomly based on capacity
     }
 
     // adds kvpair (updates if k exists)
@@ -172,46 +189,6 @@ class MyHashMap<K,V> {
         return null;
     }
 
-    public int size() { return size; }
-
-    public boolean isEmpty() { return size == 0; }
-
-    private int calculateHashedIndex(Object key) {
-        return calculateHashedIndex(key,this.hashFactor,this.buckets.length);
-    }
-
-    // Equivalent objects must return the same index
-    // Easier alternative: just use hashCode()
-    private static int calculateHashedIndex(Object key, int hashFactor, int capacity){
-        if(key==null) return 0;
-        
-        byte bytes[] = (""+key.hashCode()).getBytes();
-        int index = 0;
-        for(byte b : bytes){
-            index+=b; index%=capacity;
-            index*=hashFactor; index%=capacity;
-        }
-        return index + (index<0? capacity:0);
-    }
-
-    // returns random int that's coprime to newCapacity
-    private static int generatehashFactor(int newCapacity){
-        int newhashFactor = random.nextInt()%newCapacity;
-        while(!coprime(newCapacity,newhashFactor)) newhashFactor = random.nextInt()%newCapacity;
-        return newhashFactor;
-    }
-
-    // uses Euclidean Algorithm
-    private static boolean coprime(int M, int m){
-        if(M==0||m==0) return false; // all ints are factors of 0
-        if(M<0) M*=-1;
-        if(m<0) m*=-1;
-        if(M<m){ int hold=M; M=m; m=hold; }
-        
-        while(M%m>0){ int hold = M%m; M=m; m=hold; } // M>m
-        return m==1;
-    }
-
     @SuppressWarnings("unchecked")
     private void resize() {
         KeyValuePair<K,V>[] oldBuckets = buckets;
@@ -246,7 +223,65 @@ class MyHashMap<K,V> {
         
         return sb.toString();
     }
+    
+    
 
+    /* EZ-PZ METHODS */
+
+    public int size() { return size; }
+
+    public boolean isEmpty() { return size == 0; }
+
+
+    
+    /* HASHING METHODS: static helpers and instance */
+
+    // Equivalent objects must return the same index
+    // Easier alternative: just use hashCode()
+    private static int calculateHashedIndex(Object key, int hashFactor, int capacity){
+        if(key==null) return 0;
+        
+        byte bytes[] = (""+key.hashCode()).getBytes();
+        int index = 0;
+        for(byte b : bytes){
+            index+=b; index%=capacity;
+            index*=hashFactor; index%=capacity;
+        }
+        return index + (index<0? capacity:0);
+    }
+    
+    // index given some key's hash (mod buckets.length)
+    private int calculateHashedIndex(Object key) {
+        return calculateHashedIndex(key,this.hashFactor,this.buckets.length);
+    }
+
+    // returns random int that's coprime to newCapacity
+    private static int generatehashFactor(int newCapacity){
+        int newhashFactor = random.nextInt()%newCapacity;
+        while(!coprime(newCapacity,newhashFactor)) newhashFactor = random.nextInt()%newCapacity;
+        return newhashFactor;
+    }
+
+    // called by constructor and resize()
+    private void updateHashFactor(){
+        this.hashFactor = generatehashFactor(this.buckets.length);
+    }
+
+    // uses Euclidean Algorithm
+    private static boolean coprime(int M, int m){
+        if(M==0||m==0) return false; // all ints are factors of 0
+        if(M<0) M*=-1;
+        if(m<0) m*=-1;
+        if(M<m){ int hold=M; M=m; m=hold; }
+        
+        while(M%m>0){ int hold = M%m; M=m; m=hold; } // M>m
+        return m==1;
+    }
+
+    
+
+    /* HELPER CLASS */
+    
     private static class KeyValuePair<K,V> {
         private final K key; // do not change key! else wrong bucket!
         private V value;
