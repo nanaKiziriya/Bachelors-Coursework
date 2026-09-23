@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class MyHashApp{
     public static void main(String[] args){
         // for testing
-        MyHashMap = new MyHashMap();
+        MyHashMap hm = new MyHashMap();
     }
 }
 
@@ -77,12 +77,12 @@ class MyHashSet<E>{
 
     /* Private Methods */
     
-    private int calculateHashCodeIndex(E entry){ return calculateHashCodeIndex(entry,this.hashFactor,this.entries.length); }
+    private int calculateHashCodeIndex(Object o){ return calculateHashCodeIndex(0,this.hashFactor,this.entries.length); }
     
     // Equivalent objects must return the same index
     // Easier alternative: just use hashCode()
     private static int calculateHashCodeIndex(Object o,int hashFactor, int capacity){
-        bytes[] bytes = (""+o.hashCode()).getBytes();
+        byte bytes[] = (""+o.hashCode()).getBytes();
         int hci = 0;
         for(byte b : bytes){
             hci+=b; hci%=capacity;
