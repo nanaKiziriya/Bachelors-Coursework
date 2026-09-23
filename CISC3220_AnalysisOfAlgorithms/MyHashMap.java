@@ -26,7 +26,7 @@ public class MyHashApp{
 // Hashing: equivalent Objects must return the same hash, with different Objects having hashes that (almost) never coincide.
 class MyHashSet<E>{
     private E entries[]; // Do NOT want automatic container growth: Do not use ArrayList, Vector, etc.
-    private int hashFactor; // For hash calculation; not hardcoded; generated randomly to be coprime to container capacity: see this.generateHashFactor()
+    private int hashFactor; // Always <capacity; used for hash calculation; value not hardcoded; generated randomly to be coprime to container capacity: see this.generateHashFactor()
     private double loadFactor, growthFactor; // capacity grows by growthFactor when size exceeds loadFactor*capacity
     private static Random random = new Random(); // for generateHashFactor()
     
@@ -48,13 +48,23 @@ class MyHashSet<E>{
     public boolean remove(Object o)
     public int size()
 
-    
     /* Private Helper Methods */
+    
+    // ASSUMES 2 objects equivalent iff their toString() are equivalent
+    private static int calcHashCode(Object o,int hashFactor, int capacity){
+        bytes[] bytes = o.toString().getBytes();
+        int hc = 0;
+        for(byte b : bytes){
+            hc+=b; hc%=capacity;
+            hc*=hashFactor; hc%=capacity;
+        }
+        return hc;
+    }
 
     // returns random int coprime to newCapacity
     private static int generateHashFactor(int newCapacity){
-        int newHashFactor = random.nextInt();
-        while(!coprime(newHashFactor,newCapacity)) newHashFactor = random.nextInt();
+        int newHashFactor = random.nextInt()%newCapacity;
+        while(!coprime(newCapacity,newHashFactor)) newHashFactor = random.nextInt()%newCapacity;
         return newHashFactor;
     }
 
