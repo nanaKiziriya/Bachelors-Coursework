@@ -44,7 +44,7 @@ public class MyHashApp {
         System.out.println("hm.containsKey(\"coot\") -> " + hm.containsKey("coot"));
         System.out.println("hm.get(\"coot\") -> " + hm.get("coot"));
         
-        System.out.println("\nUpdating a preexisting key (uses same method as adding cuz lazy):");
+        System.out.println("\nUpdating/replacing a preexisting key (uses same method as adding cuz lazy):");
         System.out.println("hm.put(\"apple\", 1084034873) -> "+hm.put("apple", 1084034873));
         System.out.println("hm -> "+hm);
 
@@ -261,3 +261,4 @@ class MyHashMap<K,V> {
             return key+"="+value;
         }
     }
+}
