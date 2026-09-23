@@ -101,7 +101,7 @@ public class MyHashMap<K,V> {
 
     // adds kvpair (updates if k exists)
     // returns previous v of k
-    public V put(K key, V value) {
+    private V put(K key, V value, boolean resizeable) {
         int index = calculateHashedIndex(key);
         
         KeyValuePair<K,V> current = buckets[index];
@@ -121,9 +121,13 @@ public class MyHashMap<K,V> {
         buckets[index] = newKeyValuePair;
         size++;
 
-        if (size > buckets.length * loadFactor) resize();
+        if (resizeable && size > buckets.length * loadFactor) resize();
         
         return null;
+    }
+
+    public V put(K key, V value){
+        return put(key, value, true);
     }
 
     public V get(K key) {
@@ -131,7 +135,7 @@ public class MyHashMap<K,V> {
         KeyValuePair<K,V> current = buckets[index];
 
         while (current != null) {
-            if (current.key.equals(key)) return current.value;
+            if (Objects.equals(current.key, key)) return current.value;
             current = current.next;
         }
 
@@ -143,7 +147,7 @@ public class MyHashMap<K,V> {
         KeyValuePair<K,V> current = buckets[index];
 
         while (current != null) {
-            if (current.key.equals(key)) return true;
+            if (Objects.equals(current.key, key)) return true;
             current = current.next;
         }
 
@@ -155,7 +159,7 @@ public class MyHashMap<K,V> {
         KeyValuePair<K,V> current = buckets[index], previous=null;
     
         while (current != null) {
-            if (current.key.equals(key)) {
+            if (Objects.equals(current.key, key)) {
                 if (previous == null) buckets[index] = current.next;
                 else previous.next = current.next;
                 size--;
@@ -179,13 +183,15 @@ public class MyHashMap<K,V> {
     // Equivalent objects must return the same index
     // Easier alternative: just use hashCode()
     private static int calculateHashedIndex(Object key, int hashFactor, int capacity){
+        if(key==null) return 0;
+        
         byte bytes[] = (""+key.hashCode()).getBytes();
         int index = 0;
         for(byte b : bytes){
             index+=b; index%=capacity;
             index*=hashFactor; index%=capacity;
         }
-        return index + index<0? capacity:0;
+        return index + (index<0? capacity:0);
     }
 
     // returns random int that's coprime to newCapacity
@@ -193,7 +199,7 @@ public class MyHashMap<K,V> {
         Random random = new Random();
         int newhashFactor = random.nextInt()%newCapacity;
         while(!coprime(newCapacity,newhashFactor)) newhashFactor = random.nextInt()%newCapacity;
-        return newhashFactor%newCapacity;
+        return newhashFactor;
     }
 
     // uses Euclidean Algorithm
@@ -217,12 +223,7 @@ public class MyHashMap<K,V> {
             KeyValuePair<K,V> current = oldBucket; // start at head of this bucket chain
 
             while(current != null) {
-                // KeyValuePair<K,V> next = current.next;
-                int newIndex = calculateHashedIndex(current.key);
-                this.put(current.key,current.value);
-                // current.next = buckets[newIndex];
-                // buckets[newIndex] = current;
-
+                this.put(current.key,current.value,false);
                 current = current.next;
             }
         }
@@ -237,10 +238,13 @@ public class MyHashMap<K,V> {
             while(current!=null){
                 sb.append(current.toString());
                 sb.append(", ");
+                current = current.next;
             }
         }
         
-        sb.replace(sb.length()-2,sb.length(),"}");
+        if(!this.isEmpty()) sb.replace(sb.length()-2,sb.length(),"}");
+        else sb.append("}");
+        
         return sb.toString();
     }
 
@@ -253,5 +257,8 @@ public class MyHashMap<K,V> {
             this.key = key;
             this.value = value;
         }
+
+        public String toString(){
+            return key+"="+value;
+        }
     }
-}
