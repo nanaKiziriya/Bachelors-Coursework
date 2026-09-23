@@ -63,8 +63,8 @@ public class MyHashApp {
 }
 
 // Hashing: equivalent Objects must return the same hash, with different Objects having hashes that (almost) never coincide.
-// Potential issue from overflow if capacity*hashFactor exceeds Integer.MAX_VALUE ?
-public class MyHashMap<K,V> {
+// Potential issue from overflow if capacity*hashFactor exceeds Integer.MAX_VALUE ? nvm it should still get same index each time anyways...
+class MyHashMap<K,V> {
 
     /* DATAFIELDS */
     
@@ -78,6 +78,7 @@ public class MyHashMap<K,V> {
     private int hashFactor; // Always < capacity; used for hash calculation; value not hardcoded; generated randomly to be coprime to container capacity: see this.generatehashFactor()
     private int size = 0; // number of entries, NOTTT the number of buckets w shit in it
     // capacity is buckets.length
+    private static Random random = new Random();
     
     /* CONSTRUCTORS */
     
@@ -196,7 +197,6 @@ public class MyHashMap<K,V> {
 
     // returns random int that's coprime to newCapacity
     private static int generatehashFactor(int newCapacity){
-        Random random = new Random();
         int newhashFactor = random.nextInt()%newCapacity;
         while(!coprime(newCapacity,newhashFactor)) newhashFactor = random.nextInt()%newCapacity;
         return newhashFactor;
