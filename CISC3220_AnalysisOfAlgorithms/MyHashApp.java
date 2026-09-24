@@ -16,7 +16,7 @@
 
 
 import java.util.Random;
-import java.util.Objects;
+import java.util.Objects; // Objects.equals(a,b) to do .equals() with null
 
 // Nana Kiziriya's MyHashMap assignment... I went overboard. Unironically, it's a mental illness.
 
@@ -75,7 +75,6 @@ class MyHashMap<K,V> {
     private static final double DEFAULT_LOAD_FACTOR = 0.75;
     private static final double DEFAULT_GROWTH_FACTOR = 2;
     
-
     // Outer container: array of <k,v> pairs; Inner container: linked nodes
     // inner container at each index needs/prefers constant removal, so don't use a basic List/Vector! Linked nodes are superior here.
     // I do not want automatic outer container growth => Do not use ArrayList, Vector, etc. for outer container!
@@ -97,10 +96,12 @@ class MyHashMap<K,V> {
 
     // for this.generateHashFactor() : used at init and each resize
     private static Random random = new Random();
+
+
     
     /* CONSTRUCTORS */
 
-    // delegation chain is pretty
+    // delegation chain is pretty idc if it's efficient :D
     public MyHashMap(){ this(DEFAULT_INIT_CAPACITY); }
     public MyHashMap(int initCapacity) { this(initCapacity, DEFAULT_LOAD_FACTOR); }
     public MyHashMap(int initCapacity, double loadFactor) { this(initCapacity, loadFactor, DEFAULT_GROWTH_FACTOR); }
@@ -116,31 +117,38 @@ class MyHashMap<K,V> {
         updateHashFactor(); // sets this.hashFactor randomly based on capacity
     }
 
+
+
+    /* INSTANCE METHODS (YUCKY) */
+    
     // adds kvpair (updates if k exists)
     // returns previous v of k
+    // parameter resizeable=false for particular case: called by resize()
     private V put(K key, V value, boolean resizeable) {
+        // Case 1: key already exists
+        // search for node and replace value
+        // no size/capacity change
         int index = calculateHashedIndex(key);
-        
         KeyValuePair<K,V> current = buckets[index];
-
-        while (current != null) {
-            if (Objects.equals(current.key, key)) {
-                V oldValue = current.value;
+        while(current != null) {
+            if (Objects.equals(current.key, key)) { // if key found
+                V oldValue = current.value; // to return
                 current.value = value;
                 return oldValue;
             }
-
             current = current.next;
         }
 
+        // Case 2: novel key, append to head of bucket node chain
         KeyValuePair<K,V> newKeyValuePair = new KeyValuePair<>(key, value);
         newKeyValuePair.next = buckets[index];
         buckets[index] = newKeyValuePair;
-        size++;
 
-        if (resizeable && size > buckets.length * loadFactor) resize();
+        // incr size and check if resize needed now
+        size++;
+        if (resizeable && size >= buckets.length * loadFactor) resize();
         
-        return null;
+        return null; // old value considered null when novel key
     }
 
     public V put(K key, V value){
@@ -148,58 +156,70 @@ class MyHashMap<K,V> {
     }
 
     public V get(K key) {
+        // Case 1: find key and return value
         int index = calculateHashedIndex(key);
         KeyValuePair<K,V> current = buckets[index];
-
-        while (current != null) {
+        while(current != null) {
             if (Objects.equals(current.key, key)) return current.value;
             current = current.next;
         }
 
+        // Case 2: key DNE
         return null;
     }
 
     public boolean containsKey(K key) {
         int index = calculateHashedIndex(key);
         KeyValuePair<K,V> current = buckets[index];
-
-        while (current != null) {
-            if (Objects.equals(current.key, key)) return true;
+        while(current != null) {
+            if(Objects.equals(current.key, key)) return true;
             current = current.next;
         }
 
-        return false;
+        return false; // else not found
     }
 
     public V remove(K key) {
         int index = calculateHashedIndex(key);
-        KeyValuePair<K,V> current = buckets[index], previous=null;
-    
-        while (current != null) {
-            if (Objects.equals(current.key, key)) {
+        KeyValuePair<K,V> current = buckets[index], previous=null; // keep track of prev to close gap in linked node chain!!!
+        while(current != null) {
+            if (Objects.equals(current.key, key)) { // if key found, close gap in chain and return value
+                // close gap in chain (2 cases: head or not head)
                 if (previous == null) buckets[index] = current.next;
                 else previous.next = current.next;
+                // update size, return value
                 size--;
                 return current.value;
             }
+            // not found yet? next!
             previous = current;
             current = current.next;
         }
-        
+
+        // not found at all
         return null;
     }
 
     @SuppressWarnings("unchecked")
     private void resize() {
         KeyValuePair<K,V>[] oldBuckets = buckets;
-        buckets = (KeyValuePair<K,V>[]) new KeyValuePair[oldBuckets.length * 2]; // double da capacityyy
+
+        // growthfactor strictly greater than 1, but might be a small double...
+        // Round new capacity, and ensure strict growth
+        int newCapacity = Math.round(oldBuckets.length * this.growthFactor);
+        if(newCapacity==oldBuckets.length) newCapacity++;
+
+        // new empty hash table
+        buckets = (KeyValuePair<K,V>[]) new KeyValuePair[newCapacity]; // unchecked warning
+        
+        // update all relevant datafields
         updateHashFactor();
 
-        for (KeyValuePair<K,V> oldBucket : oldBuckets){
-            KeyValuePair<K,V> current = oldBucket; // start at head of this bucket chain
-
-            while(current != null) {
-                this.put(current.key,current.value,false);
+        for(KeyValuePair<K,V> oldBucket : oldBuckets){ // for each index in buckets
+            KeyValuePair<K,V> current = oldBucket;
+            while(current != null) { // iterate through all nodes in old bucket
+                // put into new bucket
+                this.put(current.key,current.value,false); // "false" stops any potential recursive resize() call through put()
                 current = current.next;
             }
         }
@@ -217,7 +237,8 @@ class MyHashMap<K,V> {
                 current = current.next;
             }
         }
-        
+
+        // 2 cases: closing an empty vs nonempty hashmap
         if(!this.isEmpty()) sb.replace(sb.length()-2,sb.length(),"}");
         else sb.append("}");
         
@@ -226,7 +247,7 @@ class MyHashMap<K,V> {
     
     
 
-    /* EZ-PZ METHODS */
+    /* INSTANCE METHODS (EZ-PZ) */
 
     public int size() { return size; }
 
