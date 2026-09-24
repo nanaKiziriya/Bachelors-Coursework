@@ -59,6 +59,32 @@ public class MyHashApp {
 
         System.out.println("\nTrying to remove \"boot\" again / remove nonexistant key:");
         System.out.println("hm.remove(\"boot\") -> "+hm.remove("boot"));
+
+        System.out.println("\n[BONUS] Check hashmap hashcode equivalence: based on elements, not order or capacity");
+        MyHashMap<String,Integer> hs1 = new MyHashMap<>(10);
+        MyHashMap<String,Integer> hs2 = new MyHashMap<>(1000);
+        hs1.put("1st",1);
+        hs1.put("2nd",2);
+        hs1.put("3rd",3);
+        hs1.put("4th",4);
+        
+        hs2.put("3rd",3);
+        hs2.put("1st",1);
+        hs2.put("4th",4);
+        hs2.put("2nd",2);
+
+        System.out.println("\nhs1 capacity initialized to 10");
+        System.out.println("hs1 insert order: 1,2,3,4");
+        System.out.println("hs1 -> "+hs1);
+        System.out.println("hs1.hashCode() -> "+hs1.hashCode());
+        
+        System.out.println("\nhs2 capacity initialized to 1000");
+        System.out.println("hs2 insert order: 3,1,4,2");
+        System.out.println("hs2 -> "+hs2);
+        System.out.println("hs2.hashCode() -> "+hs2.hashCode());
+        
+        System.out.println("\nhs1.equals(hs2) -> "+hs1.equals(hs2));
+        
     }
 }
 
@@ -206,7 +232,7 @@ class MyHashMap<K,V> {
 
         // growthfactor strictly greater than 1, but might be a small double...
         // Round new capacity, and ensure strict growth
-        int newCapacity = Math.round(oldBuckets.length * this.growthFactor);
+        int newCapacity = (int)Math.round(oldBuckets.length * this.growthFactor);
         if(newCapacity==oldBuckets.length) newCapacity++;
 
         // new empty hash table
@@ -224,7 +250,30 @@ class MyHashMap<K,V> {
             }
         }
     }
+    
+    
 
+    /* INSTANCE METHODS (EZ-PZ) */
+
+    public int size() { return size; }
+    public boolean isEmpty() { return size == 0; }
+    @Override
+    public int hashCode(){
+        int hc = 0;
+        for(KeyValuePair<K,V> bucket:buckets){
+            KeyValuePair<K,V> current = bucket;
+            while(current!=null){
+                hc+=current.key.hashCode()+current.value.hashCode();
+                current = current.next;
+            }
+        }
+        return hc;
+    }
+    @Override // lazy version
+    public boolean equals(Object that){
+        return this.hashCode()==that.hashCode() && that instanceof MyHashMap;
+    }
+    @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb.append("{");
@@ -244,14 +293,6 @@ class MyHashMap<K,V> {
         
         return sb.toString();
     }
-    
-    
-
-    /* INSTANCE METHODS (EZ-PZ) */
-
-    public int size() { return size; }
-
-    public boolean isEmpty() { return size == 0; }
 
 
     
