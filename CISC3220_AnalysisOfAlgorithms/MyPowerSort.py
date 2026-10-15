@@ -394,7 +394,7 @@ print('''
     2 - Asymptotically test the time complexity on random arrays of increasing size. Cool plot included!
     3 - DO BOTH!!!
 ''')
-
+valid_usr = ('1','2','3')
 usr1=None
 while usr1==None :
   usr1 = input('    Option: ')
